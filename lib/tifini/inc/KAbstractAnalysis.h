@@ -89,7 +89,7 @@ public:
     inline bool getVerboseFlag() { return verbose_flag; }
 
     virtual void preAnalysis() {};
-    virtual Bool_t analysis(Int_t event_num, HCategory * pcand, Int_t cand_size, HCategory * vcand, Int_t vect_size) = 0;
+    virtual Bool_t analysis(HEvent * fEvent, Int_t event_num, HCategory * pcand, Int_t cand_size, HCategory * vcand, Int_t vect_size) = 0;
     virtual void postAnalysis() {};
 
     virtual int Configure(int argc, char ** argv);

@@ -41,13 +41,6 @@
 const Int_t N_MDC_momdedx_spec = 7;
 const Int_t N_TOF_momdedx_spec = 7;
 
-const Int_t N_Ana = 10;
-const Int_t N_Ana_Wall = 4;
-//static const Int_t N_max_PIDs = 15;
-//static const Int_t N_max_PIDs_per_track = 15;
-const Int_t N_max_sample = 100;
-const UInt_t N_max_tracks = 500;
-
 #include "KTools.h"
 
 #define PR(x) std::cout << "++DEBUG: " << #x << " = |" << x << "| (" << __FILE__ << ", " << __LINE__ << ")\n";
@@ -72,7 +65,14 @@ namespace KT
     };
 
     // 
-    enum MetaSystem { MS_NOMETA = 0x00, MDC = 0x01, TOF = 0x02, TOFINO = 0x04, RPC = 0x08, MS_Dummy };
+    enum MetaSystem {
+        MS_NOMETA = 0x00,   ///<
+        MDC = 0x01,
+        TOF = 0x02,
+        TOFINO = 0x04,
+        RPC = 0x08,
+        MS_Dummy
+    };
 
     // particle cut ID
     enum CutID

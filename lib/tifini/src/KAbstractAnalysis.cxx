@@ -34,35 +34,16 @@ TrackInfo::TrackInfo()
             pid[ipid][ipst] = false;
 }
 
-// void TrackInfo::fill(const TrackPID & tpid)
-// {
-// /*    for(Int_t ipid = 0; ipid < KT::PID_Dummy; ++ipid)
-//         PR(pid[ipid]);
-//         */
-//     for(Int_t ipid = 0; ipid < KT::TT_Dummy; ++ipid)
-//     {
-//         KT::ParticleID selected_track_pid = tpid.pid[ipid];
-//         if ( selected_track_pid != KT::PID_Dummy )
-//         {
-//             pid[selected_track_pid] = true;//PR(selected_track_pid);
-//         }
-//         else
-//         {
-// //             pid[selected_track_pid] = false;
-//         }
-//     }
-// }
-
 KAbstractAnalysis::KAbstractAnalysis(const TString & analysisName, const TString & treeName) : _analysisName(analysisName), verbose_flag(false)
 {
     tree = new TTree(treeName, analysisName);
 
-    tree->Branch("eGoodEvent",          &eGoodEvent,        "eGoodEvent/I");
-    tree->Branch("eGoodTrigger",        &eGoodTrigger,      "eGoodTrigger/I");
-    tree->Branch("eGoodStart",          &eGoodStart,        "eGoodStart/I");
-    tree->Branch("eGoodVertCluster",    &eGoodVertCluster,  "eGoodVertCluster/I");
-    tree->Branch("eGoodVertCand",       &eGoodVertCand,     "eGoodVertCand/I");
-    tree->Branch("eNoPileUpStart",      &eNoPileUpStart,    "eNoPileUpStart/I");
+    tree->Branch("eGoodEvent",          &eGoodEvent,        "eGoodEvent/O");
+    tree->Branch("eGoodTrigger",        &eGoodTrigger,      "eGoodTrigger/O");
+    tree->Branch("eGoodStart",          &eGoodStart,        "eGoodStart/O");
+    tree->Branch("eGoodVertCluster",    &eGoodVertCluster,  "eGoodVertCluster/O");
+    tree->Branch("eGoodVertCand",       &eGoodVertCand,     "eGoodVertCand/O");
+    tree->Branch("eNoPileUpStart",      &eNoPileUpStart,    "eNoPileUpStart/O");
 
     setGoodEventSelector(Particle::kGoodTRIGGER |
         Particle::kGoodVertexClust |
@@ -143,14 +124,14 @@ Bool_t KAbstractAnalysis::setEventInfo(HParticleEvtInfo* evtinfo)
     eGoodVertCluster = evtinfo->isGoodEvent(Particle::kGoodVertexClust);
     eGoodVertCand = evtinfo->isGoodEvent(Particle::kGoodVertexCand);
     eNoPileUpStart = evtinfo->isGoodEvent(Particle::kNoPileUpSTART);
-    eGoodTrigger = evtinfo->isGoodEvent(good_event_selector);
+    eGoodEvent = evtinfo->isGoodEvent(good_event_selector);
 
-    return eGoodTrigger;
+    return eGoodEvent;
 }
 
 Bool_t KAbstractAnalysis::isGoodEvent() const
 {
-    return eGoodTrigger;
+    return eGoodEvent;
 }
 
 void KAbstractAnalysis::setHadesTrackInfo(HParticleCand * track, Int_t track_num)

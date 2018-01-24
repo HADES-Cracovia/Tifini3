@@ -5,5 +5,6 @@
 #pragma link off all functions;
 
 //#pragma link C++ class KTools+;
+#pragma link C++ class KdEdxPlots+;
 
 #endif

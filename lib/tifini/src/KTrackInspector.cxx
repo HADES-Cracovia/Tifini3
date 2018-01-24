@@ -162,6 +162,7 @@ bool KTrackInspector::registerCut(KT::MetaSystem system, KT::CutID particle, con
     }
 
     registerdEdxPlot(system);
+    return true;
 }
 
 bool KTrackInspector::optionalCut(KT::MetaSystem system, KT::CutID particle, const TString & file, const TString & cutname, Bool_t mirror_cut)
@@ -201,6 +202,7 @@ bool KTrackInspector::optionalCut(KT::MetaSystem system, KT::CutID particle, con
     }
 
     registerdEdxPlot(system);
+    return true;
 }
 
 bool KTrackInspector::registerdEdxPlot(KT::MetaSystem system)

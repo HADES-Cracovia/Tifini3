@@ -25,6 +25,7 @@
 
 #include "KAbstractAnalysis.h"
 #include "KTools.h"
+#include "KdEdxPlots.h"
 
 #include "hcategory.h"
 #include "hcategorymanager.h"
@@ -156,6 +157,9 @@ void KTifiniAnalysis::exec()
     std::cout << "Number of Analyzed events   = " << nEvents << std::endl;
 
     // get hydra categories
+    HEvent * fEvent = gHades->getCurrentEvent();
+    if  (!fEvent) exit(1);
+
     HCategory* fCatCand = (HCategory*)HCategoryManager::getCategory(catParticleCand, 1, "HParticleCandSim");
     if  (!fCatCand) exit(1);
     HCategory* fFwDetCand = (HCategory*)HCategoryManager::getCategory(catFwDetCand, 1, "catFwDetCand");
@@ -173,11 +177,14 @@ void KTifiniAnalysis::exec()
 
     ana->preAnalysis();
 
+    KdEdxPlots dEdx_plots("global");
+
     HParticleTrackSorter sorter;
     sorter.init();
 
     // loop over all events
-    for (Int_t event_num = first_event; event_num < nEvents; event_num++)
+    Int_t event_num = first_event;
+    for (; event_num < nEvents; event_num++)
     {
         if (loop->nextEvent(event_num) <= 0) 
             break;
@@ -224,25 +231,28 @@ void KTifiniAnalysis::exec()
         // loop over all tracks of the actual event
         for(Int_t i = 0; i < cand_size; ++i)
         {
-            HParticleCand * track = HCategoryManager::getObject(track,fCatCand, i);
+            HParticleCand * track = HCategoryManager::getObject(track, fCatCand, i);
             ana->setHadesTrackInfo(track, i);
+            dEdx_plots.fill(track);
         }
 
         for(Int_t i = 0; i < vect_size; ++i)
         {
-            HFwDetCand * track = HCategoryManager::getObject(track,fFwDetCand, i);
+            HFwDetCand * track = HCategoryManager::getObject(track, fFwDetCand, i);
             ana->setFwDetTrackInfo(track, i);
         }
 
         //#### ANALYSIS ####
-        ana->analysis(event_num, fCatCand, cand_size, fFwDetCand, vect_size);
+        ana->analysis(fEvent, event_num, fCatCand, cand_size, fFwDetCand, vect_size);
 
     } // End event loop
-    std::cout << "" << std::endl;
+    std::cout << nEvents-first_event << " events analyzed" << std::endl;
 
     ana->postAnalysis();
 
     Outputfile->cd();
+
+    dEdx_plots.drawPlots();
 
     ana->finalizeAnalysis();
 
@@ -321,8 +331,8 @@ int KTifiniAnalysis::Configure(int argc, char ** argv)
         {
             TString infile = argv[optind++];
             if        (infile.Contains(","))    ret = loop->addMultFiles(infile);
-            else if (infile.Contains(".root"))  { ret = loop->addFiles(infile); file_out = infile; }
-            else                                { ret = loop->addFilesList(infile); file_out = infile; }
+            else if (infile.Contains(".root"))  { ret = loop->addFiles(infile); if (file_out.Length() == 0) file_out = infile; }
+            else                                { ret = loop->addFilesList(infile); if (file_out.Length() == 0) file_out = infile; }
 
             if (file_out.Length() == 0)
                 file_out = "output.root";

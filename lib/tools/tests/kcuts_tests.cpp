@@ -6,6 +6,8 @@
 #include "KCutOutside.h"
 #include "KCutSmaller.h"
 #include "KCutBigger.h"
+#include "KCutEqual.h"
+#include "KCutNotEqual.h"
 
 class BasicCase : public CPPUNIT_NS::TestFixture
 {
@@ -41,6 +43,8 @@ void BasicCase::CutTests()
     KCutSmaller<Int_t> cs_s(20, KT::STRONG);
     KCutBigger<Int_t> cb_w(10, KT::WEAK);
     KCutBigger<Int_t> cb_s(10, KT::STRONG);
+    KCutEqual<Int_t> ce(10);
+    KCutNotEqual<Int_t> cne(10);
 
     CPPUNIT_ASSERT(ci_w.test(15) == true);
     CPPUNIT_ASSERT(ci_w.test(10) == true);
@@ -75,4 +79,10 @@ void BasicCase::CutTests()
     CPPUNIT_ASSERT(cb_s.test(5) == false);
     CPPUNIT_ASSERT(cb_s.test(10) == false);
     CPPUNIT_ASSERT(cb_s.test(15) == true);
+
+    CPPUNIT_ASSERT(ce.test(10) == true);
+    CPPUNIT_ASSERT(ce.test(20) == false);
+
+    CPPUNIT_ASSERT(cne.test(10) == false);
+    CPPUNIT_ASSERT(cne.test(20) == true);
 }

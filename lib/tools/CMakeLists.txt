@@ -1,7 +1,7 @@
 include_directories(inc)
 
 ROOT_STANDARD_LIBRARY_PACKAGE(TifiniTools
-        DEPENDENCIES ${ROOT_LIBRARIES} Hydra)
+        DEPENDENCIES ${ROOT_LIBRARIES} ${HYDRA_LIBRARIES})
 
 # Add all targets to the build-tree export set
 export(TARGETS TifiniTools

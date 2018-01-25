@@ -52,7 +52,7 @@ public:
         bPT         = 1 << 7,
     };
     bool setTree(TTree * tree, const TString& unique_name, UInt_t b = 0xffff);
-    bool fill();
+    void fill();
 
 private:
     TTree * tree;

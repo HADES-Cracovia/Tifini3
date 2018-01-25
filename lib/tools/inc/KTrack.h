@@ -30,16 +30,16 @@
 
 #include "KTifiniAnalysis.h"
 
-class KTrack : public HParticleCand
+class KTrack : public TLorentzVector
 {
 public:
     KTrack();
     virtual ~KTrack();
     void useAnglesDeg(bool use_deg);
 
-    KTrack & operator=(const KTrack & cand);
-    KTrack & operator=(const HParticleCand & cand);
-    KTrack & operator=(const TLorentzVector & cand);
+    KTrack & operator=(const KTrack & track);
+    KTrack & operator=(const HParticleCand & track);
+    KTrack & operator=(const TLorentzVector & track);
 
     enum Branches {
         bE          = 1 << 0,
@@ -57,6 +57,10 @@ public:
 private:
     TTree * tree;
     TString unique_name;
+
+    Int_t track_case;       // 0-TLorentzVector, 1-HParticleCand
+    HParticleCand tr_ah;
+    TLorentzVector tr_al;
 
     Float_t r2d;
 

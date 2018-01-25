@@ -23,7 +23,7 @@
 
 #define PR(x) std::cout << "++DEBUG: " << #x << " = |" << x << "| (" << __FILE__ << ", " << __LINE__ << ")\n";
 
-KTrack::KTrack() : HParticleCand()
+KTrack::KTrack() : TLorentzVector(), track_case(-1)
 {
 }
 
@@ -75,20 +75,28 @@ void KTrack::fill()
     fPt = TLorentzVector::Pt();
 }
 
-KTrack & KTrack::operator=(const KTrack& cand)
+KTrack & KTrack::operator=(const KTrack& track)
 {
-    *((HParticleCand *)this) = cand;
+    *((TLorentzVector *)this) = (TLorentzVector)track;
+    tr_al = track.tr_al;
+    tr_ah = track.tr_ah;
+    track_case = track.track_case;
     return *this;
 }
 
-KTrack & KTrack::operator=(const HParticleCand& cand)
+KTrack & KTrack::operator=(const HParticleCand& track)
 {
-    *((HParticleCand *)this) = cand;
+    *((TLorentzVector *)this) = (TLorentzVector)track;
+    tr_al = track;
+    tr_ah = track;
+    track_case = 1;
     return *this;
 }
 
-KTrack & KTrack::operator=(const TLorentzVector& cand)
+KTrack & KTrack::operator=(const TLorentzVector& track)
 {
-    *((TLorentzVector *)this) = cand;
+    *((TLorentzVector *)this) = track;
+    tr_al = track;
+    track_case = 0;
     return *this;
 }

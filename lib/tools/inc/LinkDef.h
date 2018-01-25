@@ -6,6 +6,7 @@
 
 //#pragma link C++ class KTools+;
 #pragma link C++ class KdEdxPlots+;
+#pragma link C++ class KTrack+;
 
 #pragma link C++ class KCutInside<Int_t>+;
 #pragma link C++ class KCutInside<UInt_t>+;

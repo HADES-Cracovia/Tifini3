@@ -23,7 +23,9 @@
 
 #define PR(x) std::cout << "++DEBUG: " << #x << " = |" << x << "| (" << __FILE__ << ", " << __LINE__ << ")\n";
 
-KTrackReconstructor::KTrackReconstructor() : KTrack(), full_case(-1)
+const HGeomVector KTrackReconstructor::vec_no_data = HGeomVector(-10000.0, -10000.0, -10000.0);
+
+KTrackReconstructor::KTrackReconstructor() : KTrack(), full_case(-1), decay_vertex(vec_no_data)
 {
 }
 
@@ -80,6 +82,17 @@ void KTrackReconstructor::fill()
 KTrackReconstructor & KTrackReconstructor::operator=(const KTrackReconstructor& cand)
 {
     *((KTrack *)this) = cand;
+    tr_ah = cand.tr_ah;
+    tr_bh = cand.tr_bh;
+
+    tr_af = cand.tr_af;
+    tr_bf = cand.tr_bf;
+
+    tr_al = cand.tr_al;
+    tr_bl = cand.tr_bl;
+
+    pair_had = cand.pair_had;
+    decay_vertex = vec_no_data;
     return *this;
 }
 
@@ -101,6 +114,13 @@ void KTrackReconstructor::reconstruct(const HParticleCand& track_a, const HParti
     tr_ah = track_a;
     tr_bh = track_b;
     full_case = 2;
+    HGeomVector ev_vertex = vec_no_data;
+
+    pair_had.setPair(&tr_ah, -1, &tr_bh, -1, -1, 0, ev_vertex);
+    decay_vertex = pair_had.getDecayVertex();
+    mtd = pair_had.getMinDistCandidates();
+    mtd_a = pair_had.getVerMinDistCand(0);
+    mtd_b = pair_had.getVerMinDistCand(1);
 }
 
 void KTrackReconstructor::reconstruct(const HParticleCand& track_a, const TLorentzVector& track_b)
@@ -108,6 +128,7 @@ void KTrackReconstructor::reconstruct(const HParticleCand& track_a, const TLoren
     reconstruct((TLorentzVector&)track_a, (TLorentzVector&)track_b);
     tr_ah = track_a;
     full_case = 1;
+    clear_no_reco();
 }
 
 void KTrackReconstructor::reconstruct(const TLorentzVector& track_a, const TLorentzVector& track_b)
@@ -116,4 +137,31 @@ void KTrackReconstructor::reconstruct(const TLorentzVector& track_a, const TLore
     tr_al = track_a;
     tr_bl = track_b;
     full_case = 0;
+    clear_no_reco();
+}
+
+void KTrackReconstructor::reconstruct(const HParticleCand& track_a, const HFwDetCand& track_b)
+{
+    reconstruct((TLorentzVector&)track_a, (TLorentzVector&)track_b);
+    tr_ah = track_a;
+    tr_bf = track_b;
+    full_case = 11;
+    clear_no_reco();
+}
+
+void KTrackReconstructor::reconstruct(const HFwDetCand& track_a, const HFwDetCand& track_b)
+{
+    reconstruct((TLorentzVector&)track_a, (TLorentzVector&)track_b);
+    tr_af = track_a;
+    tr_bf = track_b;
+    full_case = 12;
+    clear_no_reco();
+}
+
+void KTrackReconstructor::clear_no_reco()
+{
+    decay_vertex = vec_no_data;
+    mtd = -100.0;
+    mtd_a = -100.0;
+    mtd_b = -100.0;
 }

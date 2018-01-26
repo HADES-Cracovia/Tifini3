@@ -187,26 +187,35 @@ void KAbstractAnalysis::PID(HParticleCand* track, TrackInfo& tinfo)
 
     if (pid_hades[KT::p] & KT::Charge) tinfo.pid[KT::p][KT::Charge] = (charge == 1);
     if (pid_hades[KT::p] & KT::Beta) tinfo.pid[KT::p][KT::Beta] = makePID_Beta(track, KT::p);
-    if (pid_hades[KT::p] & KT::Graphical) tinfo.pid[KT::p][KT::Graphical] = trackInsp.isInside(KT::cut_p, track);
+    if (pid_hades[KT::p] & KT::Graphical) tinfo.pid[KT::p][KT::Graphical] = trackInsp.isInside(KT::DEDX, KT::cut_p, track);
 
     if (pid_hades[KT::pip] & KT::Charge) tinfo.pid[KT::pip][KT::Charge] = (charge == 1);
     if (pid_hades[KT::pip] & KT::Beta) tinfo.pid[KT::pip][KT::Beta] = makePID_Beta(track, KT::pip);
-    if (pid_hades[KT::pip] & KT::Graphical) tinfo.pid[KT::pip][KT::Graphical] = trackInsp.isInside(KT::cut_pip, track);
+    if (pid_hades[KT::pip] & KT::Graphical) tinfo.pid[KT::pip][KT::Graphical] = trackInsp.isInside(KT::DEDX, KT::cut_pip, track);
 
     if (pid_hades[KT::pim] & KT::Charge) tinfo.pid[KT::pim][KT::Charge] = (charge == -1);
     if (pid_hades[KT::pim] & KT::Beta) tinfo.pid[KT::pim][KT::Beta] = makePID_Beta(track, KT::pim);
-    if (pid_hades[KT::pim] & KT::Graphical) tinfo.pid[KT::pim][KT::Graphical] = trackInsp.isInside(KT::cut_pim, track);
+    if (pid_hades[KT::pim] & KT::Graphical) tinfo.pid[KT::pim][KT::Graphical] = trackInsp.isInside(KT::DEDX, KT::cut_pim, track);
 
     if (pid_hades[KT::Kp] & KT::Charge) tinfo.pid[KT::Kp][KT::Charge] = (charge == 1);
     if (pid_hades[KT::Kp] & KT::Beta) tinfo.pid[KT::Kp][KT::Beta] = makePID_Beta(track, KT::Kp);
-    if (pid_hades[KT::Kp] & KT::Graphical) tinfo.pid[KT::Kp][KT::Graphical] = trackInsp.isInside(KT::cut_Kp, track);
+    if (pid_hades[KT::Kp] & KT::Graphical) tinfo.pid[KT::Kp][KT::Graphical] = trackInsp.isInside(KT::DEDX, KT::cut_Kp, track);
 
     if (pid_hades[KT::Km] & KT::Charge) tinfo.pid[KT::Km][KT::Charge] = (charge == -1);
     if (pid_hades[KT::Km] & KT::Beta) tinfo.pid[KT::Km][KT::Beta] = makePID_Beta(track, KT::Km);
-    if (pid_hades[KT::Km] & KT::Graphical) tinfo.pid[KT::Km][KT::Graphical] = trackInsp.isInside(KT::cut_Km, track);
-printf("charge = %d, %d, %d\n", charge, KT::p, tinfo.pid[KT::p][KT::Charge]);
-printf("charge = %d, %d, %d\n", charge, KT::pim, tinfo.pid[KT::pim][KT::Charge]);
-printf("pid=%d\n", ((HParticleCandSim *)track)->getGeantPID());
+    if (pid_hades[KT::Km] & KT::Graphical) tinfo.pid[KT::Km][KT::Graphical] = trackInsp.isInside(KT::DEDX, KT::cut_Km, track);
+// printf("* charge = %d, %d, %d\n", charge, KT::p, tinfo.pid[KT::p][KT::Charge]);
+// printf("* charge = %d, %d, %d\n", charge, KT::pim, tinfo.pid[KT::pim][KT::Charge]);
+// printf("  charge = %d  pid=%d\n", track->getCharge(), ((HParticleCandSim *)track)->getGeantPID());
+// static Int_t good_p = 0, bad_p = 0, good_pim = 0, bad_pim = 0;
+
+// if ( ((HParticleCandSim *)track)->getGeantParentPID() <= 0 ) return;
+// if ( ((HParticleCandSim *)track)->getGeantParentPID() > 0 ) return;
+// if (charge < 0 and ((HParticleCandSim *)track)->getGeantPID() == 14) ++bad_p;
+// if (charge > 0 and ((HParticleCandSim *)track)->getGeantPID() == 14) ++good_p;
+// if (charge < 0 and ((HParticleCandSim *)track)->getGeantPID() == 9) ++good_pim;
+// if (charge > 0 and ((HParticleCandSim *)track)->getGeantPID() == 9) ++bad_pim;
+// printf("good_p=%d   bad_p=%d   good_pim=%d   bad_pim=%d\n", good_p, bad_p, good_pim, bad_pim);
 //     Float_t RichPhi   = track->getRichPhi();
 //     Float_t RichTheta = track->getRichTheta();
 //     Float_t Phi       = track->getPhi();

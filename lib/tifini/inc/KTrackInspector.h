@@ -57,15 +57,19 @@ public:
     KTrackInspector();
     virtual ~KTrackInspector();
 
-    TString MetaSystemName[KT::MS_Dummy];// = { "", "MDC", "TOF", "", "TOFINO", "", "", "" ,"RPC" };;
+    static const int DSnumber = 6;                      // DetSystem count
+    static const int CTnumber = 2;                      // CutType count
+    static const TString CutTypeName[CTnumber];
+    static const TString CutTypeUnit[CTnumber];
+    static const TString MetaSystemName[DSnumber];
 
-    bool registerCut(KT::MetaSystem system, KT::CutID particle, const TString & file, const TString & cutname, Bool_t mirror_cut = kFALSE);
-    bool optionalCut(KT::MetaSystem system, KT::CutID particle, const TString & file, const TString & cutname, Bool_t mirror_cut = kFALSE);
-    bool registerdEdxPlot(KT::MetaSystem system);
+    bool registerCut(KT::CutType ct, KT::DetSystem system, KT::CutID particle, const TString & file, const TString & cutname, Bool_t mirror_cut = kFALSE);
+    bool optionalCut(KT::CutType ct, KT::DetSystem system, KT::CutID particle, const TString & file, const TString & cutname, Bool_t mirror_cut = kFALSE);
+    bool registerdEdxPlot(KT::CutType ct, KT::DetSystem system);
 
     void configureMetaSystem(KT::CutID cid, Int_t meta);
 
-    bool isInside(KT::CutID cid, const HParticleCand * track) const;
+    bool isInside(KT::CutType ct, KT::CutID cid, const HParticleCand * track) const;
 
     void clearCache();
     void drawCuts() const;
@@ -75,38 +79,34 @@ public:
 
 private:
     void init();
+    UInt_t findDSpos(KT::DetSystem ds) { for (UInt_t i = 0; i < DSnumber; ++i) if (ds & (1 << i)) return i; }
 
 public:
     static const int mom_bins;
     static const int mom_min, mom_max;
     static const int dEdx_bins;
     static const int dEdx_min, dEdx_max;
+    static const int beta_bins;
+    static const float beta_min, beta_max;
     static const int can_width, can_height;
 
 private:
-    TFile * reqCutFilesArray[KT::MS_Dummy][KT::CID_Dummy];
-    TCutG * reqCutsArray[KT::MS_Dummy][KT::CID_Dummy];
-//     Int_t cutsFlagsArray[KT::MS_Dummy][KT::CID_Dummy];
-    TFile * optCutFilesArray[KT::MS_Dummy][KT::CID_Dummy];
-    TCutG * optCutsArray[KT::MS_Dummy][KT::CID_Dummy];
-//     Int_t optFlagsArray[KT::MS_Dummy][KT::CID_Dummy];
+    TFile * reqCutFilesArray[CTnumber][DSnumber][KT::CID_Dummy];
+    TCutG * reqCutsArray[CTnumber][DSnumber][KT::CID_Dummy];
+//     Int_t cutsFlagsArray[CTnumber][DSnumber][KT::CID_Dummy];
+    TFile * optCutFilesArray[CTnumber][DSnumber][KT::CID_Dummy];
+    TCutG * optCutsArray[CTnumber][DSnumber][KT::CID_Dummy];
+//     Int_t optFlagsArray[CTnumber][DSnumber][KT::CID_Dummy];
 
-    TH2I * cutHistograms[KT::MS_Dummy];
-    TCanvas * cutCanvases[KT::MS_Dummy];
+    TH2I * cutHistograms[CTnumber][DSnumber];
+    TCanvas * cutCanvases[CTnumber][DSnumber];
+    mutable bool cutHistogramFilled[CTnumber][DSnumber];
 
-    TH2I * cutHistogramsAcc[KT::MS_Dummy];
-    TCanvas * cutCanvasesAcc[KT::MS_Dummy];
-
-    mutable bool cutHistogramFilled[KT::MS_Dummy];
-
-    enum PseudoMetaSystem { PMS_NOMETA = 0x00, pMDC = 0x01, pTOF = 0x02, PMS_Dummy };
-    static PseudoMetaSystem pseudoMetaMapArray[KT::MS_Dummy];
-
-    bool metaSystemCfg[KT::MS_Dummy][KT::CID_Dummy];
-    UShort_t pseudoMetaSystemCfg[KT::CID_Dummy];
+    bool metaSystemCfg[CTnumber][DSnumber][KT::CID_Dummy];
+//     UShort_t pseudoMetaSystemCfg[KT::CID_Dummy];
 
     // Energy loss
-    TF1 * energyLoss[PMS_Dummy][KT::Sim+1];
+    TF1 * energyLoss[DSnumber][KT::Sim+1];
     dEdxCurveParameters cidParams[KT::CID_Dummy];
     GCutCurveParameters gcutParams[KT::CID_Dummy];
     static KT::ParticleID cidToPIDMapArray[KT::CID_Dummy];

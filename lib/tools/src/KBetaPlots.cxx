@@ -19,22 +19,20 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "KdEdxPlots.h"
+#include "KBetaPlots.h"
 
 #define PR(x) std::cout << "++DEBUG: " << #x << " = |" << x << "| (" << __FILE__ << ", " << __LINE__ << ")\n";
 
-const int KdEdxPlots::mom_bins = 600;
-const int KdEdxPlots::mom_min = -3000;
-const int KdEdxPlots::mom_max = 3000;
-const int KdEdxPlots::dEdx_bins = 400;
-const int KdEdxPlots::dEdx_min = 0;
-const int KdEdxPlots::dEdx_max = 20;
-const int KdEdxPlots::can_width = 800;
-const int KdEdxPlots::can_height = 600;
+const int KBetaPlots::mom_bins = 600;
+const int KBetaPlots::mom_min = -3000;
+const int KBetaPlots::mom_max = 3000;
+const int KBetaPlots::dEdx_bins = 400;
+const int KBetaPlots::dEdx_min = 0;
+const int KBetaPlots::dEdx_max = 20;
+const int KBetaPlots::can_width = 800;
+const int KBetaPlots::can_height = 600;
 
-const int KdEdxPlots::MSlookup[KdEdxPlots::MSnumber] = { KT::MDC, KT::TOF, KT::TOFINO, KT::STRAW };
-
-KdEdxPlots::KdEdxPlots(char * setname, UInt_t systems) : setname(setname), systems(systems)
+KBetaPlots::KBetaPlots(char * setname, UInt_t systems) : setname(setname), systems(systems)
 {
     init();
 
@@ -51,18 +49,18 @@ KdEdxPlots::KdEdxPlots(char * setname, UInt_t systems) : setname(setname), syste
 //     gcutParams[KT::cut_Km] = { kRed, 1, 1, "L" };
 }
 
-KdEdxPlots::~KdEdxPlots()
+KBetaPlots::~KBetaPlots()
 {
 //     TODO: fix memory leaks!
 }
 
-void KdEdxPlots::init()
+void KBetaPlots::init()
 {
     char * ms_names[MSnumber] = { "MDC", "TOF", "TOFINO", "RPC" };
 
     for (Int_t s = 0; s < MSnumber; ++s)
     {
-        UInt_t sys = MSlookup[s];
+        UInt_t sys = 1 << s;
 
         if (sys == KT::RPC) continue; 
 
@@ -76,7 +74,7 @@ void KdEdxPlots::init()
     }
 }
 
-void KdEdxPlots::fill(const HParticleCand * track)
+void KBetaPlots::fill(const HParticleCand * track)
 {
     Double_t mom = track->getMomentum();
     Double_t charge = track->getCharge();
@@ -86,7 +84,9 @@ void KdEdxPlots::fill(const HParticleCand * track)
 
     for (int s = 0; s < MSnumber; ++s)
     {
-        UInt_t sys = MSlookup[s];
+        UInt_t sys = 1 << s;
+        if (sys == KT::RPC) continue;
+
         if (sys == KT::TOFINO and tof_system != 0) continue;
         if (sys == KT::TOF and tof_system != 1) continue;
 
@@ -112,11 +112,12 @@ void KdEdxPlots::fill(const HParticleCand * track)
     }
 }
 
-void KdEdxPlots::drawPlots() const
+void KBetaPlots::drawPlots() const
 {
     for (Int_t s = 0; s < MSnumber; ++s)
     {
-        UInt_t sys = MSlookup[s];
+        UInt_t sys = 1 << s;
+        if (sys == KT::RPC) continue;
 
         if (! (sys & systems) )
             continue;
@@ -176,11 +177,11 @@ void KdEdxPlots::drawPlots() const
     }*/
 }
 
-void KdEdxPlots::clearPlots()
+void KBetaPlots::clearPlots()
 {
     for (Int_t s = 0; s < MSnumber; ++s)
     {
-        UInt_t sys = MSlookup[s];
+        UInt_t sys = 1 << s;
         if (sys == KT::RPC) continue;
 
         if (! (sys & systems) )

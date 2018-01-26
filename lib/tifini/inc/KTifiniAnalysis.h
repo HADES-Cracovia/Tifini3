@@ -65,19 +65,24 @@ namespace KT
     };
 
     // 
-    enum MetaSystem {
-        MS_NOMETA = 0x00,   ///<
+    enum DetSystem {
         MDC = 0x01,
         TOF = 0x02,
         TOFINO = 0x04,
         RPC = 0x08,
-        MS_Dummy
+        STRAW = 0x10,
+        FDRPC = 0x20
     };
 
     // particle cut ID
     enum CutID
     {
         cut_p = 0, cut_pip, cut_pim, cut_Kp, cut_Km, cut_el, cut_po, CID_Dummy
+    };
+
+    // Cut type
+    enum CutType {
+        DEDX, BETA
     };
 
     //

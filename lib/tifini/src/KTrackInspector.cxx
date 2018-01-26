@@ -22,13 +22,10 @@
 #include "KTrackInspector.h"
 
 #define PR(x) std::cout << "++DEBUG: " << #x << " = |" << x << "| (" << __FILE__ << ", " << __LINE__ << ")\n";
-/*
- TString KTrackInspector::MetaSystemName[KT::MS_MDC] = "MDC";
- TString KTrackInspector::MetaSystemName[KT::MS_TOF] = "TOF";
- TString KTrackInspector::MetaSystemName[KT::MS_TOFINO] = "TOFINO";
- TString KTrackInspector::MetaSystemName[KT::MS_RPC] = "RPC";
-*/
-//const TString KTrackInspector::MetaSystemName[KT::MS_MDC] = { "", "MDC", "TOF", "", "TOFINO", "", "", "", "RPC" };
+
+const TString KTrackInspector::CutTypeName[KTrackInspector::CTnumber] = { "dEdx", "Beta" };
+const TString KTrackInspector::CutTypeUnit[KTrackInspector::CTnumber] = { "dE/dx [MeV * 1/m]", "beta [c] " };
+const TString KTrackInspector::MetaSystemName[KTrackInspector::DSnumber] = { "MDC", "TOF", "TOFINO", "RPC", "STRAW", "FDRPC" };
 
 const int KTrackInspector::mom_bins = 600;
 const int KTrackInspector::mom_min = -3000;
@@ -36,18 +33,11 @@ const int KTrackInspector::mom_max = 3000;
 const int KTrackInspector::dEdx_bins = 400;
 const int KTrackInspector::dEdx_min = 0;
 const int KTrackInspector::dEdx_max = 20;
+const int KTrackInspector::beta_bins = 440;
+const float KTrackInspector::beta_min = 0;
+const float KTrackInspector::beta_max = 1.1;
 const int KTrackInspector::can_width = 800;
 const int KTrackInspector::can_height = 600;
-
-KTrackInspector::PseudoMetaSystem KTrackInspector::pseudoMetaMapArray[KT::MS_Dummy] = {
-    KTrackInspector::PMS_NOMETA,
-    KTrackInspector::pMDC,
-    KTrackInspector::pTOF,
-    KTrackInspector::PMS_NOMETA, 
-    KTrackInspector::pTOF,
-    KTrackInspector::PMS_NOMETA, KTrackInspector::PMS_NOMETA, KTrackInspector::PMS_NOMETA,
-    KTrackInspector::pTOF
-};
 
 KT::ParticleID KTrackInspector::cidToPIDMapArray[KT::CID_Dummy] = { KT::p, KT::pip, KT::pim, KT::Kp, KT::Km };
 
@@ -95,40 +85,33 @@ KTrackInspector::~KTrackInspector()
 
 void KTrackInspector::init()
 {
-    MetaSystemName[KT::MDC] = "MDC";
-    MetaSystemName[KT::TOF] = "TOF";
-    MetaSystemName[KT::TOFINO] = "TOFINO";
-    MetaSystemName[KT::RPC] = "RPC";
-
-    for (Int_t s = 0; s < KT::MS_Dummy; ++s)
+    for (Int_t ct = 0; ct < CTnumber; ++ct)
+    for (Int_t s = 0; s < DSnumber; ++s)
     {
-        cutHistograms[s] = NULL;
-        cutCanvases[s] = NULL;
+        cutHistograms[ct][s] = nullptr;
+        cutCanvases[ct][s] = nullptr;
 
-        cutHistogramsAcc[s] = NULL;
-        cutCanvasesAcc[s] = NULL;
-
-        cutHistogramFilled[s] = false;
+        cutHistogramFilled[ct][s] = false;
 
         for (Int_t c = 0; c < KT::CID_Dummy; ++c)
         {
-            metaSystemCfg[s][c] = false;
-            reqCutFilesArray[s][c] = NULL;
-            reqCutsArray[s][c] = NULL;
+            metaSystemCfg[ct][s][c] = false;
+            reqCutFilesArray[ct][s][c] = nullptr;
+            reqCutsArray[ct][s][c] = nullptr;
         }
     }
 
-    for (Int_t p = 0; p < PMS_Dummy; ++p)
+    for (Int_t p = 0; p < DSnumber; ++p)
     {
-        energyLoss[p][0] = NULL;
-        energyLoss[p][1] = NULL;
+        energyLoss[p][0] = nullptr;
+        energyLoss[p][1] = nullptr;
     }
 }
 
-bool KTrackInspector::registerCut(KT::MetaSystem system, KT::CutID particle, const TString & file, const TString & cutname, Bool_t mirror_cut)
+bool KTrackInspector::registerCut(KT::CutType ct, KT::DetSystem system, KT::CutID particle, const TString & file, const TString & cutname, Bool_t mirror_cut)
 {
     TFile * f = TFile::Open(file);
-    TCutG * cut = NULL;
+    TCutG * cut = nullptr;
 
     if (f)
     {
@@ -147,8 +130,8 @@ bool KTrackInspector::registerCut(KT::MetaSystem system, KT::CutID particle, con
         return false;
     }
 
-    reqCutFilesArray[system][particle] = f;
-    reqCutsArray[system][particle] = cut;
+    reqCutFilesArray[ct][system][particle] = f;
+    reqCutsArray[ct][system][particle] = cut;
 //     cutsFlagsArray[system][particle] = ignore_polarity;
     if (mirror_cut)
     {
@@ -161,14 +144,14 @@ bool KTrackInspector::registerCut(KT::MetaSystem system, KT::CutID particle, con
         }
     }
 
-    registerdEdxPlot(system);
+    registerdEdxPlot(ct, system);
     return true;
 }
 
-bool KTrackInspector::optionalCut(KT::MetaSystem system, KT::CutID particle, const TString & file, const TString & cutname, Bool_t mirror_cut)
+bool KTrackInspector::optionalCut(KT::CutType ct, KT::DetSystem system, KT::CutID particle, const TString & file, const TString & cutname, Bool_t mirror_cut)
 {
     TFile * f = TFile::Open(file);
-    TCutG * cut = NULL;
+    TCutG * cut = nullptr;
 
     if (f)
     {
@@ -187,9 +170,9 @@ bool KTrackInspector::optionalCut(KT::MetaSystem system, KT::CutID particle, con
         return false;
     }
 
-    optCutFilesArray[system][particle] = f;
-    optCutsArray[system][particle] = cut;
-//     cutsFlagsArray[system][particle] = ignore_polarity;
+    optCutFilesArray[ct][system][particle] = f;
+    optCutsArray[ct][system][particle] = cut;
+
     if (mirror_cut)
     {
         Double_t x, y;
@@ -201,29 +184,21 @@ bool KTrackInspector::optionalCut(KT::MetaSystem system, KT::CutID particle, con
         }
     }
 
-    registerdEdxPlot(system);
+    registerdEdxPlot(ct, system);
     return true;
 }
 
-bool KTrackInspector::registerdEdxPlot(KT::MetaSystem system)
+bool KTrackInspector::registerdEdxPlot(KT::CutType ct, KT::DetSystem system)
 {
-    if (!cutHistograms[system])
+    if (!cutHistograms[ct][system])
     {
-        TString hist_name = "Hist_dEdx_" + MetaSystemName[system];
-        TString hist_title = "dEdx vs mom: " + MetaSystemName[system] + ";polarity * momentum [MeV/c];dE/dx [MeV * 1/m]";
-        cutHistograms[system] = new TH2I(hist_name, hist_title, mom_bins, mom_min, mom_max, dEdx_bins, dEdx_min, dEdx_max);
+        TString hist_name = "Hist_" + CutTypeName[ct] + "_" + MetaSystemName[system];
+        TString hist_title = CutTypeName[ct] + " vs mom: " + MetaSystemName[system] + ";polarity * momentum [MeV/c];" + CutTypeUnit[ct];
+        cutHistograms[ct][system] = new TH2I(hist_name, hist_title, mom_bins, mom_min, mom_max, dEdx_bins, dEdx_min, dEdx_max);
 
-        hist_name = "Hist_dEdx_" + MetaSystemName[system] + "_Accepted";
-        hist_title = "dEdx vs mom: " + MetaSystemName[system] + ";polarity * momentum [MeV/c];dE/dx [MeV * 1/m]";
-        cutHistogramsAcc[system] = new TH2I(hist_name, hist_title, mom_bins, mom_min, mom_max, dEdx_bins, dEdx_min, dEdx_max);
-
-        TString can_name = "Can_dEdx_" + MetaSystemName[system];
-        TString can_title = "dEdx vs mom: " + MetaSystemName[system];
-        cutCanvases[system] = new TCanvas(can_name, can_title, can_width, can_height);
-
-        can_name = "Can_dEdx_" + MetaSystemName[system] + "_Accepted";
-        can_title = "dEdx vs mom: " + MetaSystemName[system];
-        cutCanvasesAcc[system] = new TCanvas(can_name, can_title, can_width, can_height);
+        TString can_name = "Can_" + CutTypeName[ct] + "_" + MetaSystemName[system];
+        TString can_title = CutTypeName[ct] + " vs mom: " + MetaSystemName[system];
+        cutCanvases[ct][system] = new TCanvas(can_name, can_title, can_width, can_height);
     }
 
     return true;
@@ -231,29 +206,31 @@ bool KTrackInspector::registerdEdxPlot(KT::MetaSystem system)
 
 void KTrackInspector::configureMetaSystem(KT::CutID cid, Int_t meta)
 {
-    pseudoMetaSystemCfg[cid] = 0x00;
+//     pseudoMetaSystemCfg[cid] = 0x00;
 
-    for (int s = 1; s < KT::MS_Dummy; s = s << 1) {
+    for (Int_t ct = 0; ct < CTnumber; ++ct)
+    for (int s = 0; s < DSnumber; ++s)
+    {
         if (s & meta)
-            metaSystemCfg[s][cid] = true;
+            metaSystemCfg[ct][s][cid] = true;
         else
-            metaSystemCfg[s][cid] = false;
+            metaSystemCfg[ct][s][cid] = false;
 
-        pseudoMetaSystemCfg[cid] |= (metaSystemCfg[s][cid] << pseudoMetaMapArray[s]);
+//         pseudoMetaSystemCfg[ct][cid] |= (metaSystemCfg[s][cid] << pseudoMetaMapArray[s]);
     }
 }
 
-bool KTrackInspector::isInside(KT::CutID cid, const HParticleCand * track) const
+bool KTrackInspector::isInside(KT::CutType ct, KT::CutID cid, const HParticleCand * track) const
 {
-    UShort_t _isInside = 0x00;
-
     Double_t mom = track->getMomentum();
     Double_t charge = track->getCharge();
     Double_t momcharge = mom*charge;
     Double_t dEdx = 0.0;
-// PR(0);
-    for (int s = 1; s < KT::MS_Dummy; s = s << 1)
-    {//PR(s);
+
+    Bool_t _isInsideSystem = kFALSE;
+
+    for (int s = 1; s < DSnumber; s = s << 1)
+    {
         dEdx = 0.0;
         switch (s)
         {
@@ -272,14 +249,11 @@ bool KTrackInspector::isInside(KT::CutID cid, const HParticleCand * track) const
                 continue;
         }
 
-        Bool_t _isInsideSystem = kFALSE;
-// PR(2);
         if (metaSystemCfg[s][cid])
         {
             if (reqCutsArray[s][cid])
             {
-                _isInsideSystem = reqCutsArray[s][cid]->IsInside(momcharge, dEdx);
-                _isInside |= ( _isInsideSystem << pseudoMetaMapArray[s]);
+                _isInsideSystem = reqCutsArray[ct][s][cid]->IsInside(momcharge, dEdx);
             }
             else
             {
@@ -287,46 +261,41 @@ bool KTrackInspector::isInside(KT::CutID cid, const HParticleCand * track) const
                 return false;
             }
         }
-// PR(1);
-        if (cutHistograms[s] and !cutHistogramFilled[s])
+
+        if (cutHistograms[ct][s] and !cutHistogramFilled[ct][s])
         {
-            cutHistograms[s]->Fill(momcharge, dEdx);
-
-            if (_isInsideSystem)
-                cutHistogramsAcc[s]->Fill(momcharge, dEdx);
-
-//             cutHistogramFilled[s] = true;
+            cutHistograms[ct][s]->Fill(momcharge, dEdx);
         }
 
         
     }
 
-    bool res = (_isInside == pseudoMetaSystemCfg[cid]);
-    
-    return res;
+    return _isInsideSystem;
 }
 
-void KTrackInspector::drawCuts() const {
-    for (Int_t s = 0; s < KT::MS_Dummy; ++s)
+void KTrackInspector::drawCuts() const
+{
+    for (Int_t ct = 0; ct < CTnumber; ++ct)
+    for (Int_t s = 0; s < DSnumber; ++s)
     {
-        if (!cutCanvases[s])
+        if (!cutCanvases[ct][s])
             continue;
 
-        cutCanvases[s]->cd();
-        cutHistograms[s]->Write();
-        cutHistograms[s]->Draw("colz");
+        cutCanvases[ct][s]->cd();
+        cutHistograms[ct][s]->Write();
+        cutHistograms[ct][s]->Draw("colz");
 
         for (int i = 0;  i < KT::CID_Dummy; ++i)
         {
-            if (metaSystemCfg[s][i])
+            if (metaSystemCfg[ct][s][i])
             {
 
-                if (reqCutsArray[s][i])
+                if (reqCutsArray[ct][s][i])
                 {
-                    reqCutsArray[s][i]->SetLineColor(gcutParams[i].lineColor);
-                    reqCutsArray[s][i]->SetLineWidth(gcutParams[i].lineWidth);
-                    reqCutsArray[s][i]->SetLineStyle(gcutParams[i].lineStyle);
-                    reqCutsArray[s][i]->Draw(gcutParams[i].drawOpts);
+                    reqCutsArray[ct][s][i]->SetLineColor(gcutParams[i].lineColor);
+                    reqCutsArray[ct][s][i]->SetLineWidth(gcutParams[i].lineWidth);
+                    reqCutsArray[ct][s][i]->SetLineStyle(gcutParams[i].lineStyle);
+                    reqCutsArray[ct][s][i]->Draw(gcutParams[i].drawOpts);
                 }
                 else
                 {
@@ -335,9 +304,7 @@ void KTrackInspector::drawCuts() const {
             }
         }
 
-        TF1 * fitFunc = energyLoss[pseudoMetaMapArray[s]][KT::Exp];
-
-//         cutCanvases[s]->Draw();
+        TF1 * fitFunc = energyLoss[s][KT::Exp];
 
         if (fitFunc)
         {
@@ -351,60 +318,15 @@ void KTrackInspector::drawCuts() const {
             }
         }
 
-        cutCanvases[s]->Write();
-    }
-
-    for (Int_t s = 0; s < KT::MS_Dummy; ++s)
-    {
-        if (!cutCanvasesAcc[s])
-            continue;
-
-        cutCanvasesAcc[s]->cd();
-        cutHistogramsAcc[s]->Write();
-        cutHistogramsAcc[s]->Draw("colz");
-
-        for (int i = 0;  i < KT::CID_Dummy; ++i)
-        {
-            if (metaSystemCfg[s][i])
-            {
-
-                if (reqCutsArray[s][i])
-                {
-                    reqCutsArray[s][i]->SetLineColor(gcutParams[i].lineColor);
-                    reqCutsArray[s][i]->SetLineWidth(gcutParams[i].lineWidth);
-                    reqCutsArray[s][i]->SetLineStyle(gcutParams[i].lineStyle);
-                    reqCutsArray[s][i]->Draw(gcutParams[i].drawOpts);
-                }
-                else
-                {
-                    std::cerr << "+++ WARNING: No cuts for DET: " << s << " and PART: " << i << std::endl;
-                }
-            }
-        }
-
-        TF1 * fitFunc = energyLoss[pseudoMetaMapArray[s]][KT::Exp];
-
-//         cutCanvases[s]->Draw();
-
-        if (fitFunc)
-        {
-            for (Int_t c = 0; c < KT::CID_Dummy; ++c) {
-                fitFunc->SetLineColor(cidParams[c].lineColor);
-                fitFunc->SetLineWidth(cidParams[c].lineWidth);
-                fitFunc->SetLineStyle(cidParams[c].lineStyle);
-                fitFunc->SetParameter(8, cidToPIDMapArray[c]);
-                fitFunc->SetRange(cidParams[c].x1, cidParams[c].x2);
-                fitFunc->DrawCopy("same");
-            }
-        }
-
-        cutCanvasesAcc[s]->Write();
+        cutCanvases[ct][s]->Write();
     }
 }
 
 void KTrackInspector::clearCache()
 {
-    for (Int_t s = 0; s < KT::MS_Dummy; ++s) {
-        cutHistogramFilled[s] = false;
+    for (Int_t ct = 0; ct < CTnumber; ++ct)
+    for (Int_t s = 0; s < DSnumber; ++s)
+    {
+        cutHistogramFilled[ct][s] = false;
     }
 }

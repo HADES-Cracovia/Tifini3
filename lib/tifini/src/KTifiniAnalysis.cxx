@@ -114,8 +114,6 @@ void KTifiniAnalysis::exec()
 
     if (!filedir.IsNull() and !filedir.EndsWith("/"))
         filedir = filedir + "/";
-    if (!outdir.IsNull() and !outdir.EndsWith("/"))
-        outdir = outdir + "/";
 
     TString filename_in = file_out;
 
@@ -138,6 +136,20 @@ void KTifiniAnalysis::exec()
         filename_in = filedir + filename_in;
 
     file_out = filename_in + outputfile_suffix;
+
+    if (!outdir.IsNull())
+    {
+        if (!outdir.EndsWith("/"))
+            outdir = outdir + "/";
+
+        Ssiz_t s = file_out.Last('/');
+        if (s == -1)
+            file_out = outdir + file_out;
+        else
+        {
+            file_out = outdir + file_out(s, -1);
+        }
+    }
 
     // OUTPUT file is created
     std::cout << "Output file: " << file_out <<std::endl;
@@ -357,12 +369,6 @@ int KTifiniAnalysis::Configure(int argc, char ** argv)
                 std::exit(EXIT_FAILURE);
             }
         }
-    }
-
-    if (outdir.IsNull())
-    {
-        std::cerr << "Output directory is mandatory. Run your program with option '-o'. See '-h' for details. Aborting.\n";
-        exit(EXIT_FAILURE);
     }
 
     return optind;

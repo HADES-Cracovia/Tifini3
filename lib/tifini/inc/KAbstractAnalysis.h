@@ -55,6 +55,7 @@ struct TrackInfo
 
     bool pid[KT::PID_Dummy+1][KT::PST_Dummy];
     int polarity = 0;
+    bool is_used = false;
 };
 
 class KAbstractAnalysis
@@ -70,6 +71,8 @@ public:
 
     void setHadesTrackInfo(HParticleCand * track, Int_t track_num);
     void setFwDetTrackInfo(HFwDetCand * track, Int_t track_num);
+
+    const TrackInfo & getHadesTrackInfo(Int_t track_num) const { return hades_tracks[track_num]; }
 
     virtual void initAnalysis(KT::Experiment exp, KT::AnalysisType analysisType);
     virtual void finalizeAnalysis();

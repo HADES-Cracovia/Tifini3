@@ -47,7 +47,7 @@ KPlotsdEdx::KPlotsdEdx(const char * setname) : KPlots(setname)
 //     gcutParams[KT::cut_Km] = { kRed, 1, 1, "L" };
 }
 
-void KPlotsdEdx::fill(const HParticleCand * track)
+void KPlotsdEdx::fill_h(TH2I * h[], const HParticleCand * track)
 {
     Double_t mom = track->getMomentum();
     Double_t charge = track->getCharge();
@@ -79,6 +79,6 @@ void KPlotsdEdx::fill(const HParticleCand * track)
                 continue;
         }
 
-        h_ds[s]->Fill(momcharge, dEdx);
+        h[s]->Fill(momcharge, dEdx);
     }
 }

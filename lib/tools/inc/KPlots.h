@@ -40,12 +40,15 @@ public:
 
     bool isSystemActive(KT::DetSystem ds) const { return systems & ds; }
     bool isSystemActive(UInt_t id) const { return systems & (1 << id); }
-    virtual void fill(const HParticleCand * track) = 0;
+    virtual void fill(const HParticleCand * track) { fill_h(h_ds, track); }
+    virtual void fill_acc(const HParticleCand * track) { fill_h(h_ds_acc, track); }
 
     void clearPlots();
     void drawPlots() const;
 
 protected:
+    virtual void fill_h(TH2I * h[], const HParticleCand * track) = 0;
+
     virtual UInt_t lookup(KT::DetSystem ds);
     virtual KT::DetSystem rlookup(UInt_t id);
     virtual TString names(KT::DetSystem ds);
@@ -58,6 +61,8 @@ protected:
     static const TString ds_name[ds_number];
     TH2I * h_ds[ds_number];
     TCanvas * c_ds[ds_number];
+    TH2I * h_ds_acc[ds_number];
+    TCanvas * c_ds_acc[ds_number];
 
 private:
     TString setname;

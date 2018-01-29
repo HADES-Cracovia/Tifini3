@@ -36,7 +36,8 @@ class KPlotsdEdx : public KPlots
 public:
     KPlotsdEdx(const char * setname);
 
-    void fill(const HParticleCand * track);
+protected:
+    void fill_h(TH2I * h[], const HParticleCand * track);
 
 public:
     static const int mom_bins;

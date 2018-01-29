@@ -46,6 +46,9 @@ KPlots::KPlots(const char * setname) : setname(setname)
     {
         h_ds[s] = nullptr;
         c_ds[s] = nullptr;
+
+        h_ds_acc[s] = nullptr;
+        c_ds_acc[s] = nullptr;
     }
     init(KT::NOSYSTEM, "", "", 0, 0, 0, 0, 0, 0);
 }
@@ -56,6 +59,9 @@ KPlots::~KPlots()
     {
         delete h_ds[s];
         delete c_ds[s];
+
+        delete h_ds_acc[s];
+        delete c_ds_acc[s];
     }
 }
 
@@ -66,19 +72,34 @@ void KPlots::init(UInt_t systems, const char * label_x, const char * label_y, in
     {
         if (h_ds[s]) delete h_ds[s];
         if (c_ds[s]) delete c_ds[s];
+        if (h_ds_acc[s]) delete h_ds_acc[s];
+        if (c_ds_acc[s]) delete c_ds_acc[s];
 
         h_ds[s] = nullptr;
         c_ds[s] = nullptr;
+        h_ds_acc[s] = nullptr;
+        c_ds_acc[s] = nullptr;
 
         if ( !isSystemActive(s) ) continue;
 
-        TString hname = TString::Format("h_ds_%s_%s", setname.Data(), ds_name[s].Data());
-        TString cname = TString::Format("c_ds_%s_%s", setname.Data(), ds_name[s].Data());
-        TString hlabel = TString::Format("h_ds_%s_%s;%s;%s", setname.Data(), ds_name[s].Data(), label_x, label_y);
-        TString clabel = TString::Format("c_ds_%s_%s", setname.Data(), ds_name[s].Data());
+        {
+            TString hname = TString::Format("h_ds_%s_%s", setname.Data(), ds_name[s].Data());
+            TString cname = TString::Format("c_ds_%s_%s", setname.Data(), ds_name[s].Data());
+            TString hlabel = TString::Format("h_ds_%s_%s;%s;%s", setname.Data(), ds_name[s].Data(), label_x, label_y);
+            TString clabel = TString::Format("c_ds_%s_%s", setname.Data(), ds_name[s].Data());
 
-        h_ds[s] = new TH2I(hname.Data(), hlabel.Data(), bins_x, x_min, X_max, bins_y, y_min, y_max);
-        c_ds[s] = new TCanvas(cname.Data(), clabel.Data(), can_width, can_height);
+            h_ds[s] = new TH2I(hname.Data(), hlabel.Data(), bins_x, x_min, X_max, bins_y, y_min, y_max);
+            c_ds[s] = new TCanvas(cname.Data(), clabel.Data(), can_width, can_height);
+        }
+        {
+            TString hname = TString::Format("h_ds_acc_%s_%s", setname.Data(), ds_name[s].Data());
+            TString cname = TString::Format("c_ds_acc_%s_%s", setname.Data(), ds_name[s].Data());
+            TString hlabel = TString::Format("h_ds_acc_%s_%s;%s;%s", setname.Data(), ds_name[s].Data(), label_x, label_y);
+            TString clabel = TString::Format("c_ds_acc_%s_%s", setname.Data(), ds_name[s].Data());
+
+            h_ds_acc[s] = new TH2I(hname.Data(), hlabel.Data(), bins_x, x_min, X_max, bins_y, y_min, y_max);
+            c_ds_acc[s] = new TCanvas(cname.Data(), clabel.Data(), can_width, can_height);
+        }
     }
 }
 
@@ -93,6 +114,12 @@ void KPlots::drawPlots() const
 
         h_ds[s]->Write();
         c_ds[s]->Write();
+
+        c_ds_acc[s]->cd();
+        h_ds_acc[s]->Draw("colz");
+
+        h_ds_acc[s]->Write();
+        c_ds_acc[s]->Write();
     }
 /*
     for (Int_t s = 0; s < KT::MS_Dummy; ++s)
@@ -150,6 +177,7 @@ void KPlots::clearPlots()
         if ( !isSystemActive(s) ) continue;
 
         h_ds[s]->Clear();
+        h_ds_acc[s]->Clear();
     }
 }
 

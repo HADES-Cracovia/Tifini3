@@ -45,7 +45,7 @@ KPlotsBeta::KPlotsBeta(const char * setname) : KPlots(setname)
 //     gcutParams[KT::cut_Km] = { kRed, 1, 1, "L" };
 }
 
-void KPlotsBeta::fill(const HParticleCand * track)
+void KPlotsBeta::fill_h(TH2I * h[], const HParticleCand * track)
 {
     Double_t mom = track->getMomentum();
     Double_t charge = track->getCharge();
@@ -61,6 +61,6 @@ void KPlotsBeta::fill(const HParticleCand * track)
         if (sys == KT::TOFINO and tof_system != 0) continue;
         if (sys == KT::TOF and tof_system != 1) continue;
 
-        h_ds[s]->Fill(momcharge, beta);
+        h[s]->Fill(momcharge, beta);
     }
 }

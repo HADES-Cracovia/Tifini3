@@ -270,6 +270,16 @@ void KTifiniAnalysis::exec()
         //#### ANALYSIS ####
         ana->analysis(fEvent, event_num, fCatCand, cand_size, fFwDetCand, vect_size);
 
+        for(Int_t i = 0; i < cand_size; ++i)
+        {
+            if (ana->getHadesTrackInfo(i).is_used)
+            {
+                HParticleCand * track = HCategoryManager::getObject(track, fCatCand, i);
+                dEdx_plots.fill_acc(track);
+                beta_plots.fill_acc(track);
+            }
+        }
+
     } // End event loop
     std::cout << nEvents-first_event << " events analyzed" << std::endl;
 

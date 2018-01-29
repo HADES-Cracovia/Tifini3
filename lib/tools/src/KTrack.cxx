@@ -59,6 +59,16 @@ bool KTrack::setTree(TTree* tree, const TString& unique_name, UInt_t b)
     if (b & bPhi)       CREATE_BRANCH("Phi",        fPhi,       'F');
     if (b & bY)         CREATE_BRANCH("Y",          fY,         'F');
     if (b & bPT)        CREATE_BRANCH("Pt",         fPt,        'F');
+    if (b && bDSinfo)
+    {
+                        CREATE_BRANCH("System",     fSystem,    'S');
+                        CREATE_BRANCH("Charge",     fCharge,    'S');
+                        CREATE_BRANCH("fTofRec",    fTofRec,    'S');
+
+                        CREATE_BRANCH("Beta",       fBeta,      'F');
+                        CREATE_BRANCH("MDCdEdx",    fMDCdEdx,   'F');
+                        CREATE_BRANCH("TOFdEdx",    fTOFdEdx,   'F');
+    }
 
     return true;
 }
@@ -73,6 +83,25 @@ void KTrack::fill()
     fPhi = TLorentzVector::Phi() * r2d;
     fY = TLorentzVector::Rapidity();
     fPt = TLorentzVector::Pt();
+
+    if (track_case == 1)
+    {
+        fSystem = tr_ah.getSystem();
+        fCharge = tr_ah.getCharge();
+        fTofRec = tr_ah.getTofRec();
+        fBeta = tr_ah.getBeta();
+        fMDCdEdx = tr_ah.getMdcdEdx();
+        fTOFdEdx = tr_ah.getTofdEdx();
+    }
+    else
+    {
+        fSystem = -1;
+        fCharge = 0;
+        fTofRec = 0;
+        fBeta = 0.;
+        fMDCdEdx = 0.;
+        fTOFdEdx = 0.;
+    }
 }
 
 KTrack & KTrack::operator=(const KTrack& track)

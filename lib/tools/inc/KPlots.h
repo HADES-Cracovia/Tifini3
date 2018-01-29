@@ -17,8 +17,8 @@
  */
 
 
-#ifndef KBETAPLOTS_H
-#define KBETAPLOTS_H
+#ifndef KPLOTS_H
+#define KPLOTS_H
 
 #include "TH2.h"
 #include "TCanvas.h"
@@ -30,48 +30,39 @@
 
 #include "KTifiniAnalysis.h"
 
-class KBetaPlots
+class KPlots
 {
 public:
-    KBetaPlots(char * setname, UInt_t systems = KT::MDC | KT::TOF | KT::TOFINO);
-    virtual ~KBetaPlots();
+    KPlots(const char * setname);
+    virtual ~KPlots();
 
-    void fill(const HParticleCand * track);
+    void init(UInt_t systems, const char * label_x, const char * label_y, int bins_x, float x_min, float X_max, int bins_y, float y_min, float y_max);
+
+    bool isSystemActive(KT::DetSystem ds) const { return systems & ds; }
+    bool isSystemActive(UInt_t id) const { return systems & (1 << id); }
+    virtual void fill(const HParticleCand * track) = 0;
 
     void clearPlots();
     void drawPlots() const;
 
-private:
-    void init();
+protected:
+    virtual UInt_t lookup(KT::DetSystem ds);
+    virtual KT::DetSystem rlookup(UInt_t id);
+    virtual TString names(KT::DetSystem ds);
 
 public:
-    static const int mom_bins;
-    static const int mom_min, mom_max;
-    static const int dEdx_bins;
-    static const int dEdx_min, dEdx_max;
     static const int can_width, can_height;
 
-private:
-    static const int MSnumber = 4;
-    TH2I * h_dEdx[MSnumber];
-    TCanvas * c_dEdx[MSnumber];
+protected:
+    static const UInt_t ds_number = 6;
+    static const TString ds_name[ds_number];
+    TH2I * h_ds[ds_number];
+    TCanvas * c_ds[ds_number];
 
+private:
     TString setname;
     UInt_t systems;
-//     TH2I * cutHistogramsAcc[KT::MS_Dummy];
-//     TCanvas * cutCanvasesAcc[KT::MS_Dummy];
-// 
-//     mutable bool cutHistogramFilled[KT::MS_Dummy];
-//     // Energy loss
-//     TF1 * energyLoss[PMS_Dummy][KT::Sim+1];
-
-    struct dEdxCurveParameters {
-        Int_t lineColor, lineWidth, lineStyle;
-        Float_t x1, x2;
-    };
-    dEdxCurveParameters cidParams[KT::CID_Dummy];
-//     GCutCurveParameters gcutParams[KT::CID_Dummy];
-//     static KT::ParticleID cidToPIDMapArray[KT::CID_Dummy];
+    TString label_x, label_y;
 };
 
-#endif // KBETAPLOTS_H
+#endif // KPLOTS_H

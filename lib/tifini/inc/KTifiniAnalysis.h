@@ -66,6 +66,7 @@ namespace KT
 
     // 
     enum DetSystem {
+        NOSYSTEM = 0x00,
         MDC = 0x01,
         TOF = 0x02,
         TOFINO = 0x04,

@@ -25,7 +25,8 @@
 
 #include "KAbstractAnalysis.h"
 #include "KTools.h"
-#include "KdEdxPlots.h"
+#include "KPlotsdEdx.h"
+#include "KPlotsBeta.h"
 
 #include "hcategory.h"
 #include "hcategorymanager.h"
@@ -177,7 +178,16 @@ void KTifiniAnalysis::exec()
 
     ana->preAnalysis();
 
-    KdEdxPlots dEdx_plots("global");
+    KPlotsdEdx dEdx_plots("global_dEdx");
+    KPlotsBeta beta_plots("global_beta");
+
+    dEdx_plots.init(KT::MDC | KT::TOF | KT::TOFINO, "charge * momentum / q * MeV/c", "dEdx / [a.u.]",
+                    KPlotsdEdx::mom_bins, KPlotsdEdx::mom_min, KPlotsdEdx::mom_max,
+                    KPlotsdEdx::dEdx_bins, KPlotsdEdx::dEdx_min, KPlotsdEdx::dEdx_max);
+
+    beta_plots.init(KT::RPC | KT::TOF | KT::TOFINO, "charge * momentum / q * MeV/c", "beta / c",
+                    KPlotsBeta::mom_bins, KPlotsBeta::mom_min, KPlotsBeta::mom_max,
+                    KPlotsBeta::beta_bins, KPlotsBeta::beta_min, KPlotsBeta::beta_max);
 
     HParticleTrackSorter sorter;
     sorter.init();
@@ -234,12 +244,15 @@ void KTifiniAnalysis::exec()
             HParticleCand * track = HCategoryManager::getObject(track, fCatCand, i);
             ana->setHadesTrackInfo(track, i);
             dEdx_plots.fill(track);
+            beta_plots.fill(track);
         }
 
         for(Int_t i = 0; i < vect_size; ++i)
         {
             HFwDetCand * track = HCategoryManager::getObject(track, fFwDetCand, i);
             ana->setFwDetTrackInfo(track, i);
+//             dEdx_plots.fill(track);  FIXME
+//             beta_plots.fill(track);
         }
 
         //#### ANALYSIS ####
@@ -253,6 +266,7 @@ void KTifiniAnalysis::exec()
     Outputfile->cd();
 
     dEdx_plots.drawPlots();
+    beta_plots.drawPlots();
 
     ana->finalizeAnalysis();
 

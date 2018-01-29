@@ -13,4 +13,8 @@ install(TARGETS TifiniTools
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     COMPONENT shlib COMPONENT dev)
 
-subdirs(tests)
+find_package(cppunit)
+
+if (cppunit_FOUND)
+    subdirs(tests)
+endif()

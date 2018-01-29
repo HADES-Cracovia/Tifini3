@@ -38,6 +38,7 @@ KAbstractAnalysis::KAbstractAnalysis(const TString & analysisName, const TString
 {
     tree = new TTree(treeName, analysisName);
 
+    // event info
     tree->Branch("eGoodEvent",          &eGoodEvent,        "eGoodEvent/O");
     tree->Branch("eGoodTrigger",        &eGoodTrigger,      "eGoodTrigger/O");
     tree->Branch("eGoodStart",          &eGoodStart,        "eGoodStart/O");

@@ -17,8 +17,8 @@
  */
 
 
-#ifndef KDEDXPLOTS_H
-#define KDEDXPLOTS_H
+#ifndef KPLOTSDEDX_H
+#define KPLOTSDEDX_H
 
 #include "TH2.h"
 #include "TCanvas.h"
@@ -29,20 +29,14 @@
 #include "hparticlecand.h"
 
 #include "KTifiniAnalysis.h"
+#include "KPlots.h"
 
-class KdEdxPlots
+class KPlotsdEdx : public KPlots
 {
 public:
-    KdEdxPlots(char * setname, UInt_t systems = KT::MDC | KT::TOF | KT::TOFINO | KT::STRAW);
-    virtual ~KdEdxPlots();
+    KPlotsdEdx(const char * setname);
 
     void fill(const HParticleCand * track);
-
-    void clearPlots();
-    void drawPlots() const;
-
-private:
-    void init();
 
 public:
     static const int mom_bins;
@@ -52,11 +46,6 @@ public:
     static const int can_width, can_height;
 
 private:
-    static const int MSnumber = 4;
-    static const int MSlookup[MSnumber];
-    TH2I * h_dEdx[MSnumber];
-    TCanvas * c_dEdx[MSnumber];
-
     TString setname;
     UInt_t systems;
 //     TH2I * cutHistogramsAcc[KT::MS_Dummy];
@@ -75,4 +64,4 @@ private:
 //     static KT::ParticleID cidToPIDMapArray[KT::CID_Dummy];
 };
 
-#endif // KDEDXPLOTS_H
+#endif // KPLOTSDEDX_H

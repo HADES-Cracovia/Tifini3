@@ -50,8 +50,9 @@ public:
         bPhi        = 1 << 5,
         bY          = 1 << 6,
         bPT         = 1 << 7,
+        bDSinfo     = 1 << 8
     };
-    bool setTree(TTree * tree, const TString& unique_name, UInt_t b = 0xffff);
+    bool setTree(TTree * tree, const TString& unique_name, UInt_t b = 0xff);
     void fill();
 
 private:
@@ -67,6 +68,13 @@ private:
     Float_t fE, fM, fP;
     Float_t fTheta, fCosTheta, fPhi;
     Float_t fY, fPt;
+
+    Short_t fSystem;
+    Short_t fCharge;
+    Short_t fTofRec;
+    Float_t fBeta;
+    Float_t fMDCdEdx;
+    Float_t fTOFdEdx;
 
 //     tree->Branch("fPolX",           &g_ads.fPolX,           "fPolX/F");
 //     tree->Branch("fPolY",           &g_ads.fPolY,           "fPolY/F");

@@ -24,10 +24,19 @@
 
 #include <TString.h>
 
-#include "hcategory.h"
+#include "Tifini3Config.h"
+
+#ifdef HYDRA1COMP
+#include "HParticleCand.h"
+#include "heventheader.h"
+#else
 #include "hparticlecand.h"
 #include "hparticleevtinfo.h"
 #include "hfwdetcand.h"
+#endif
+
+#include "hcategory.h"
+#include "hevent.h"
 
 #include "KTifiniAnalysis.h"
 #include "KTrackInspector.h"
@@ -66,11 +75,15 @@ public:
     virtual ~KAbstractAnalysis();
 
     void resetEvent();
+#ifndef HYDRA1COMP
     Bool_t setEventInfo(HParticleEvtInfo* evtinfo);
+#endif
     Bool_t isGoodEvent() const;
 
     void setHadesTrackInfo(HParticleCand * track, Int_t track_num);
+#ifndef HYDRA1COMP
     void setFwDetTrackInfo(HFwDetCand * track, Int_t track_num);
+#endif
 
     const TrackInfo & getHadesTrackInfo(Int_t track_num) const { return hades_tracks[track_num]; }
 
@@ -92,7 +105,11 @@ public:
     inline bool getVerboseFlag() { return verbose_flag; }
 
     virtual void preAnalysis() {};
+#ifdef HYDRA1COMP
+    virtual Bool_t analysis(HEvent * fEvent, Int_t event_num, HCategory * pcand, Int_t cand_size) = 0;
+#else
     virtual Bool_t analysis(HEvent * fEvent, Int_t event_num, HCategory * pcand, Int_t cand_size, HCategory * vcand, Int_t vect_size) = 0;
+#endif
     virtual void postAnalysis() {};
 
     virtual int Configure(int argc, char ** argv);
@@ -109,8 +126,9 @@ protected:
     virtual void configureTree(TTree * tree) = 0;
 
     virtual void PID(HParticleCand * track, TrackInfo & tinfo);
+#ifndef HYDRA1COMP
     virtual void PID(HFwDetCand * track, TrackInfo & tinfo);
-
+#endif
     bool makePID_Beta(const HParticleCand *cand, KT::ParticleID pid);
 
 protected:

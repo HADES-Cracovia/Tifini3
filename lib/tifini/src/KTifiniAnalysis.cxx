@@ -29,12 +29,38 @@
 #include "KPlotsBeta.h"
 
 #include "hcategory.h"
-#include "hcategorymanager.h"
 #include "hgeantkine.h"
-#include "hparticletracksorter.h"
+
+#ifdef HYDRA1COMP
+#include "TChain.h"
+#include "heventheader.h"
+#include "hpidevtinfo.h"
+#include "HParticleCand.h"
+#include "hpidtracksorter.h"
+#else
+#include "hcategorymanager.h"
 #include "hparticleevtinfo.h"
+#include "hparticletracksorter.h"
+#endif
 
+#ifdef HYDRA1COMP
+static Bool_t selectHadronsQa(HPidTrackCand * pcand)
+{
+    Bool_t test = kFALSE;
+    if (pcand->isFlagAND(4,
+            HPidTrackCand::kIsAcceptedHitInnerMDC,
+            HPidTrackCand::kIsAcceptedHitOuterMDC,
+            HPidTrackCand::kIsAcceptedHitMETA,
+            HPidTrackCand::kIsAcceptedRK
+    )
+       &&
+       pcand->getTrackData()->getRKChiSquare()     < 1000000
+    )
+        test = kTRUE;
 
+    return test;
+}
+#else
 static Bool_t selectHadronsQa(HParticleCand * pcand)
 {
     Bool_t test = kFALSE;
@@ -52,6 +78,7 @@ static Bool_t selectHadronsQa(HParticleCand * pcand)
 
     return test;
 }
+#endif
 
 KTifiniAnalysis::KTifiniAnalysis(int argc, char** argv, KT::AnalysisType at, KAbstractAnalysis * ana) :
     analysisType(at), expName(KT::pp45),
@@ -59,7 +86,12 @@ KTifiniAnalysis::KTifiniAnalysis(int argc, char** argv, KT::AnalysisType at, KAb
     flag_verbose(0), flag_list(0),
     eventsnr(100000)
 {
+#ifdef HYDRA1COMP
+    gHades->setQuietMode(2);
+    source = new HRootSource();
+#else
     loop = new HLoop(kTRUE);
+#endif
 
     int optsleft = Configure(argc, argv);
     argc_ = argc - optsleft + 1;
@@ -155,14 +187,26 @@ void KTifiniAnalysis::exec()
     std::cout << "Output file: " << file_out <<std::endl;
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HYDRA1COMP
+    Hades* myHades = new Hades;
+    myHades->setDataSource(source);
+
+    if(!myHades->init())
+    {
+        cout<<"Hades Init() failed!"<<endl;
+        exit(1);
+    }
+
+    loop = source->getTree();
+    Long64_t num_events       = loop->GetEntries();
+#else
     if (!loop->setInput(""))
-    {   // reading file structure
+    {
         std::cerr << "READBACK: ERROR : cannot read input !" << std::endl;
         std::exit(EXIT_FAILURE);
     }
-
-    // prepare event loop counters
     Long64_t num_events       = loop->getEntries();
+#endif
     Long64_t first_event      = 0;
 
     Int_t nEvents = eventsnr;
@@ -173,13 +217,18 @@ void KTifiniAnalysis::exec()
     HEvent * fEvent = gHades->getCurrentEvent();
     if  (!fEvent) exit(1);
 
+#ifdef HYDRA1COMP
+    HCategory* fCatCand = (HCategory*)gHades->getCurrentEvent()->getCategory(catPidCandidate);
+#else
     HCategory* fCatCand = (HCategory*)HCategoryManager::getCategory(catParticleCand, 1, "HParticleCandSim");
-    if  (!fCatCand) exit(1);
     HCategory* fFwDetCand = (HCategory*)HCategoryManager::getCategory(catFwDetCand, 1, "catFwDetCand");
-    if  (!fFwDetCand) exit(1);
-
     HCategory* catHParticleEvtInfo  = (HCategory*)HCategoryManager::getCategory(catParticleEvtInfo ,kTRUE,"catParticleEvtInfo");
     HIterator* iterParticleEvtInfo = (HIterator *)catHParticleEvtInfo->MakeIterator("native");
+
+    if  (!fFwDetCand) exit(1);
+#endif
+
+    if  (!fCatCand) exit(1);
 
     // prepare output tree
     TFile * Outputfile = new TFile(file_out, "RECREATE");
@@ -201,16 +250,24 @@ void KTifiniAnalysis::exec()
                     KPlotsBeta::mom_bins, KPlotsBeta::mom_min, KPlotsBeta::mom_max,
                     KPlotsBeta::beta_bins, KPlotsBeta::beta_min, KPlotsBeta::beta_max);
 
+#ifdef HYDRA1COMP
+    HPidTrackSorter sorter;
+#else
     HParticleTrackSorter sorter;
+#endif
     sorter.init();
 
     // loop over all events
     Int_t event_num = first_event;
     for (; event_num < nEvents; event_num++)
     {
+#ifdef HYDRA1COMP
+        if (!gHades->eventLoop(1,0))
+            break;
+#else
         if (loop->nextEvent(event_num) <= 0) 
             break;
-
+#endif
 //         if (loop->nextEvent(event_num) <= 0) { cout << " end reached " << endl; break; } // last event reached
 // 
 //         if (event_num != 0  &&  event_num % 50 == 0)
@@ -227,9 +284,10 @@ void KTifiniAnalysis::exec()
 
         ana->resetEvent();
 
-        HParticleEvtInfo* evtinfo;
-        evtinfo = HCategoryManager::getObject(evtinfo, catParticleEvtInfo, 0);
-
+#ifdef HYDRA1COMP
+        // FIXME
+#else
+        HParticleEvtInfo* evtinfo = HCategoryManager::getObject(evtinfo, catParticleEvtInfo, 0);
         if (!ana->setEventInfo(evtinfo))
         {
             continue;
@@ -238,27 +296,39 @@ void KTifiniAnalysis::exec()
         Int_t RpcMult       = evtinfo->getSumRpcMultHitCut();
         Int_t TofMult       = evtinfo->getSumTofMultCut();
         Int_t SelectedPart  = evtinfo->getSumSelectedParticleCandMult();
+#endif
 
         sorter.cleanUp();
         sorter.resetFlags(kTRUE, kTRUE, kTRUE, kTRUE);  // reset all flags for flags (0-28), reject, used, lepton
         Int_t nCandHad = sorter.fill(selectHadronsQa);  // fill only good hadrons (already marked good leptons will be skipp)
         //Int_t nCandHad     = sorter.fill(selectHadronsQa_noMeta2);   // fill only good hadrons (already marked good leptons will be skipp$
 //         Int_t nCandHad     = sorter.fill(HParticleTrackSorter::selectHadrons);   // fill only good hadrons (already marked good leptons will be skipp$
+#ifdef HYDRA1COMP
+        Int_t nCandHadBest = sorter.selectBest(HPidTrackSorter::kIsBestRK, HPidTrackSorter::kIsHadron);
+#else
         Int_t nCandHadBest = sorter.selectBest(HParticleTrackSorter::kIsBestRK, HParticleTrackSorter::kIsHadron);
-
+#endif
         Int_t cand_size = fCatCand->getEntries();
+#ifndef HYDRA1COMP
         Int_t vect_size = fFwDetCand->getEntries(); // number of Emc hits in this event
-
+#endif
         //#### HADES Tracks ####
         // loop over all tracks of the actual event
         for(Int_t i = 0; i < cand_size; ++i)
         {
+#ifdef HYDRA1COMP
+            HPidTrackCand * tcand = (HPidTrackCand *)fCatCand->getObject(i);
+            HParticleCand _track = *tcand;
+            HParticleCand * track = &_track;
+#else
             HParticleCand * track = HCategoryManager::getObject(track, fCatCand, i);
+#endif
             ana->setHadesTrackInfo(track, i);
             dEdx_plots.fill(track);
             beta_plots.fill(track);
         }
 
+#ifndef HYDRA1COMP
         for(Int_t i = 0; i < vect_size; ++i)
         {
             HFwDetCand * track = HCategoryManager::getObject(track, fFwDetCand, i);
@@ -266,15 +336,25 @@ void KTifiniAnalysis::exec()
 //             dEdx_plots.fill(track);  FIXME
 //             beta_plots.fill(track);
         }
+#endif
 
         //#### ANALYSIS ####
+#ifdef HYDRA1COMP
+        ana->analysis(fEvent, event_num, fCatCand, cand_size);
+#else
         ana->analysis(fEvent, event_num, fCatCand, cand_size, fFwDetCand, vect_size);
-
+#endif
         for(Int_t i = 0; i < cand_size; ++i)
         {
             if (ana->getHadesTrackInfo(i).is_used)
             {
+#ifdef HYDRA1COMP
+                HPidTrackCand * tcand = (HPidTrackCand *)fCatCand->getObject(i);
+                HParticleCand _track = *tcand;
+                HParticleCand * track = &_track;
+#else
                 HParticleCand * track = HCategoryManager::getObject(track, fCatCand, i);
+#endif
                 dEdx_plots.fill_acc(track);
                 beta_plots.fill_acc(track);
             }
@@ -366,10 +446,13 @@ int KTifiniAnalysis::Configure(int argc, char ** argv)
         while (optind < argc)
         {
             TString infile = argv[optind++];
+#ifdef HYDRA1COMP
+            if (infile.Contains(".root"))  { ret = source->addFile(infile); if (file_out.Length() == 0) file_out = infile; }
+#else
             if        (infile.Contains(","))    ret = loop->addMultFiles(infile);
             else if (infile.Contains(".root"))  { ret = loop->addFiles(infile); if (file_out.Length() == 0) file_out = infile; }
             else                                { ret = loop->addFilesList(infile); if (file_out.Length() == 0) file_out = infile; }
-
+#endif
             if (file_out.Length() == 0)
                 file_out = "output.root";
 

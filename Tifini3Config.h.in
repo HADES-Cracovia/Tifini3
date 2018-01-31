@@ -1,0 +1,6 @@
+#ifndef TIFINI3CONFIG_H
+#define TIFINI3CONFIG_H
+
+#cmakedefine HYDRA1COMP
+
+#endif /* TIFINI3CONFIG_H */

@@ -18,24 +18,33 @@ include(GNUInstallDirs)
 
 ##### set paths
 if(WIN32 AND NOT CYGWIN)
-	set(DEF_CMAKE_INSTALL_CMAKEDIR cmake)
+    set(DEF_CMAKE_INSTALL_CMAKEDIR cmake)
 else()
-	set(DEF_CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME})
+    set(DEF_CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME})
 endif()
 set(CMAKE_INSTALL_CMAKEDIR ${DEF_CMAKE_INSTALL_CMAKEDIR} CACHE PATH "Installation directory for CMake files")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-find_package(HYDRA)
+##### make targets
+option(HYDRA1COMP "Compile Hydra-1 mode" OFF)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/inc)
+configure_file(Tifini3Config.h.in inc/Tifini3Config.h)
+
+if (HYDRA1COMP)
+    find_package(HYDRA)
+    set( HYDRA1COMP_LIB TifiniH1Comp )
+else()
+    find_package(HYDRA2)
+endif()
+
 
 ##### directories
 include_directories(${ROOT_INCLUDE_DIRS} ${TIFINI3_INCLUDE_DIR} ${HADDIR}/include)
 link_directories(${ROOT_LIBRARY_DIRS} ${TIFINI3_LIBRARY_DIR} ${HADDIR}/lib)
 
 add_definitions(${ROOT_CXX_FLAGS})
-
-##### make targets
 
 add_subdirectory(lib)
 
@@ -45,20 +54,24 @@ export(PACKAGE ${CMAKE_PROJECT_NAME})
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(Config.cmake.in ${CMAKE_PROJECT_NAME}Config.cmake
-	INSTALL_DESTINATION ${CMAKE_INSTALL_CMAKEDIR}
-	PATH_VARS CMAKE_INSTALL_INCLUDEDIR CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_BINDIR)
+    INSTALL_DESTINATION ${CMAKE_INSTALL_CMAKEDIR}
+    PATH_VARS CMAKE_INSTALL_INCLUDEDIR CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_BINDIR)
 
 write_basic_package_version_file(${CMAKE_PROJECT_NAME}ConfigVersion.cmake
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY SameMajorVersion)
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion)
 
 install(FILES 
-	${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
-	${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake
-	DESTINATION ${CMAKE_INSTALL_CMAKEDIR})
+    ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_CMAKEDIR})
+
+install(FILES 
+    ${CMAKE_CURRENT_BINARY_DIR}/inc/Tifini3Config.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 install(EXPORT ${CMAKE_PROJECT_NAME}Targets
-	DESTINATION ${CMAKE_INSTALL_CMAKEDIR} COMPONENT dev)
+    DESTINATION ${CMAKE_INSTALL_CMAKEDIR} COMPONENT dev)
 
 # messages
 MESSAGE(STATUS "<<< Configuration >>>
@@ -81,10 +94,12 @@ C++		${CMAKE_CXX_FLAGS}
 Linker flags:
 Executable      ${CMAKE_EXE_LINKER_FLAGS}
 Module          ${CMAKE_MODULE_LINKER_FLAGS}
-Shared          ${CMAKE_SHARED_LINKER_FLAGS}\n")
+Shared          ${CMAKE_SHARED_LINKER_FLAGS}
+
+Hydra1 Comp     ${HYDRA1COMP}  ${HYDRA1COMP_LIB}\n")
 
 foreach(p LIB BIN INCLUDE CMAKE)
-	message(STATUS "CMAKE_INSTALL_${p}DIR: ${CMAKE_INSTALL_${p}DIR}")
+    message(STATUS "CMAKE_INSTALL_${p}DIR: ${CMAKE_INSTALL_${p}DIR}")
 endforeach()
 
 # unset  (ELOG CACHE)

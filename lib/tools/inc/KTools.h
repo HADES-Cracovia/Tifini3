@@ -26,7 +26,14 @@
 #include <TLine.h>
 #include <TLorentzVector.h>
 
-#include <hparticlecand.h>
+#include "Tifini3Config.h"
+
+#ifdef HYDRA1COMP
+#include "HParticleCand.h"
+#else
+#include "hparticlecand.h"
+#endif
+
 #include <hgeomvector.h>
 
 typedef std::pair<HGeomVector, HGeomVector> hgvpair;

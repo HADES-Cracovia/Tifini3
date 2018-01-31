@@ -85,13 +85,17 @@ KTrackReconstructor & KTrackReconstructor::operator=(const KTrackReconstructor& 
     tr_ah = cand.tr_ah;
     tr_bh = cand.tr_bh;
 
+#ifndef HYDRA1COMP
     tr_af = cand.tr_af;
     tr_bf = cand.tr_bf;
+#endif
 
     tr_al = cand.tr_al;
     tr_bl = cand.tr_bl;
 
+#ifndef HYDRA1COMP
     pair_had = cand.pair_had;
+#endif
     decay_vertex = vec_no_data;
     return *this;
 }
@@ -116,11 +120,15 @@ void KTrackReconstructor::reconstruct(const HParticleCand& track_a, const HParti
     full_case = 2;
     HGeomVector ev_vertex = vec_no_data;
 
+#ifndef HYDRA1COMP
     pair_had.setPair(&tr_ah, -1, &tr_bh, -1, -1, 0, ev_vertex);
     decay_vertex = pair_had.getDecayVertex();
     mtd = pair_had.getMinDistCandidates();
     mtd_a = pair_had.getVerMinDistCand(0);
     mtd_b = pair_had.getVerMinDistCand(1);
+#else
+    // TODO
+#endif
 }
 
 void KTrackReconstructor::reconstruct(const HParticleCand& track_a, const TLorentzVector& track_b)
@@ -140,6 +148,7 @@ void KTrackReconstructor::reconstruct(const TLorentzVector& track_a, const TLore
     clear_no_reco();
 }
 
+#ifndef HYDRA1COMP
 void KTrackReconstructor::reconstruct(const HParticleCand& track_a, const HFwDetCand& track_b)
 {
     reconstruct((TLorentzVector&)track_a, (TLorentzVector&)track_b);
@@ -157,6 +166,7 @@ void KTrackReconstructor::reconstruct(const HFwDetCand& track_a, const HFwDetCan
     full_case = 12;
     clear_no_reco();
 }
+#endif
 
 void KTrackReconstructor::clear_no_reco()
 {

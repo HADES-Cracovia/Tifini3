@@ -36,7 +36,16 @@
 #include "Rtypes.h"
 #include "TApplication.h"
 
+#include "Tifini3Config.h"
+
+#ifdef HYDRA1COMP
+#include "TChain.h"
+#include "hrootsource.h"
+#include "hpidtrackcand.h"
+#else
 #include "hloop.h"
+#include "hparticlecand.h"
+#endif
 
 const Int_t N_MDC_momdedx_spec = 7;
 const Int_t N_TOF_momdedx_spec = 7;
@@ -127,7 +136,12 @@ private:
     KT::Experiment expName;
 
     // general:
+#ifdef HYDRA1COMP
+    HRootSource* source;
+    TTree * loop;
+#else
     HLoop * loop;                  // standard input
+#endif
     EventTracks * event;
 
     KAbstractAnalysis * ana;

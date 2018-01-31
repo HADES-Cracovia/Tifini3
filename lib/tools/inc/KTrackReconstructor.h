@@ -26,9 +26,16 @@
 #include "TFile.h"
 #include "TString.h"
 
+#include "Tifini3Config.h"
+
+#ifdef HYDRA1COMP
+#include "HParticleCand.h"
+#else
 #include "hparticlecand.h"
-#include "hfwdetcand.h"
 #include "hparticlepair.h"
+#include "hparticleevtinfo.h"
+#include "hfwdetcand.h"
+#endif
 
 #include "KTifiniAnalysis.h"
 #include "KTrack.h"
@@ -47,8 +54,10 @@ public:
     void reconstruct(const HParticleCand & track_a, const HParticleCand & track_b);
     void reconstruct(const HParticleCand & track_a, const TLorentzVector & track_b);
     void reconstruct(const TLorentzVector & track_a, const TLorentzVector & track_b);
+#ifndef HYDRA1COMP
     void reconstruct(const HParticleCand & track_a, const HFwDetCand & track_b);
     void reconstruct(const HFwDetCand & track_a, const HFwDetCand & track_b);
+#endif
 
     HGeomVector getDecayVertex() const { return decay_vertex; }
     Float_t getMTD() const { return mtd; }
@@ -75,10 +84,14 @@ private:
 
     Int_t full_case;            // 0=L&L, 1=l&H, 2=H&H, 11=F&L, 12=F&H L: TLorentzVector, H: HParticleCand, F: HFeDwtCand
     HParticleCand tr_ah, tr_bh;
+#ifndef HYDRA1COMP
     HFwDetCand tr_af, tr_bf;
+#endif
     TLorentzVector tr_al, tr_bl;
 
+#ifndef HYDRA1COMP
     HParticlePair pair_had;
+#endif
     HGeomVector decay_vertex;
     Float_t mtd;
     Float_t mtd_a;

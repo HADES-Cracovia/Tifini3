@@ -16,7 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "hparticlecandsim.h"
 #include "hphysicsconstants.h"
 
 #include "KTifiniAnalysis.h"
@@ -46,11 +45,13 @@ KAbstractAnalysis::KAbstractAnalysis(const TString & analysisName, const TString
     tree->Branch("eGoodVertCand",       &eGoodVertCand,     "eGoodVertCand/O");
     tree->Branch("eNoPileUpStart",      &eNoPileUpStart,    "eNoPileUpStart/O");
 
+#ifndef HYDRA1COMP
     setGoodEventSelector(Particle::kGoodTRIGGER |
         Particle::kGoodVertexClust |
         Particle::kGoodVertexCand |
         Particle::kGoodSTART |
         Particle::kNoPileUpSTART);
+#endif
 
     setPidSelectionHades(KT::p, KT::Charge);
     setPidSelectionHades(KT::pim, KT::Charge);
@@ -118,6 +119,7 @@ void KAbstractAnalysis::resetEvent()
     fwdet_tracks.clear();
 }
 
+#ifndef HYDRA1COMP
 Bool_t KAbstractAnalysis::setEventInfo(HParticleEvtInfo* evtinfo)
 {
     eGoodTrigger = evtinfo->isGoodEvent(Particle::kGoodTRIGGER);
@@ -129,10 +131,15 @@ Bool_t KAbstractAnalysis::setEventInfo(HParticleEvtInfo* evtinfo)
 
     return eGoodEvent;
 }
+#endif
 
 Bool_t KAbstractAnalysis::isGoodEvent() const
 {
+#ifndef HYDRA1COMP
     return eGoodEvent;
+#else
+    return kTRUE;
+#endif
 }
 
 void KAbstractAnalysis::setHadesTrackInfo(HParticleCand * track, Int_t track_num)
@@ -144,6 +151,7 @@ void KAbstractAnalysis::setHadesTrackInfo(HParticleCand * track, Int_t track_num
     hades_tracks.push_back(ti);
 }
 
+#ifndef HYDRA1COMP
 void KAbstractAnalysis::setFwDetTrackInfo(HFwDetCand * track, Int_t track_num)
 {
     TrackInfo ti;
@@ -175,6 +183,7 @@ void KAbstractAnalysis::PID(HFwDetCand * track, TrackInfo & tinfo)
     if (pid_fwdet[KT::Km] & KT::Beta) tinfo.pid[KT::Km][KT::Beta] = true;
     if (pid_fwdet[KT::Km] & KT::Graphical) tinfo.pid[KT::Km][KT::Beta] = true;
 }
+#endif
 
 void KAbstractAnalysis::PID(HParticleCand* track, TrackInfo& tinfo)
 {
@@ -255,6 +264,7 @@ bool KAbstractAnalysis::makePID_Beta(const HParticleCand *cand, KT::ParticleID p
     else
         return false;
 }
+
 int KAbstractAnalysis::Configure(int argc, char** argv)
 {
     return argc;

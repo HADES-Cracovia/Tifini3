@@ -26,8 +26,6 @@
 #include "TFile.h"
 #include "TString.h"
 
-#include "hparticlecand.h"
-
 #include "KTifiniAnalysis.h"
 
 class KVertex : public HGeomVector

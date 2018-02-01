@@ -42,6 +42,7 @@
 #include "TChain.h"
 #include "hrootsource.h"
 #include "hpidtrackcand.h"
+class Hades;
 #else
 #include "hloop.h"
 #include "hparticlecand.h"
@@ -137,6 +138,7 @@ private:
 
     // general:
 #ifdef HYDRA1COMP
+    Hades* myHades;
     HRootSource* source;
     TTree * loop;
 #else

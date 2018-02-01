@@ -87,6 +87,7 @@ KTifiniAnalysis::KTifiniAnalysis(int argc, char** argv, KT::AnalysisType at, KAb
     eventsnr(100000)
 {
 #ifdef HYDRA1COMP
+    myHades = new Hades;
     gHades->setQuietMode(2);
     source = new HRootSource();
 #else
@@ -188,7 +189,6 @@ void KTifiniAnalysis::exec()
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HYDRA1COMP
-    Hades* myHades = new Hades;
     myHades->setDataSource(source);
 
     if(!myHades->init())

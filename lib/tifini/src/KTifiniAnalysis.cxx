@@ -180,7 +180,7 @@ void KTifiniAnalysis::exec()
             file_out = outdir + file_out;
         else
         {
-            file_out = outdir + file_out(s, -1);
+            file_out = outdir + file_out(s, 1000);
         }
     }
 

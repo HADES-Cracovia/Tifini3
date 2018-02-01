@@ -30,23 +30,23 @@ HParticleCand::HParticleCand() :
 
 HParticleCand::HParticleCand(HPidTrackCand& cand)
 {
-    tcand = cand;
-    hd = *cand.getHitData();   // hit information
-    td = *cand.getTrackData(); // track canidate
+    tcand = &cand;
+    HPidHitData * hd = tcand->getHitData();   // hit information
+    HPidTrackData * td = tcand->getTrackData(); // track canidate
 
-    Float_t dxRkMeta = td.dxRkMeta;
-    Float_t dyRkMeta = td.dyRkMeta;
-    Float_t dzRkMeta = td.dzRkMeta;
+    Float_t dxRkMeta = td->dxRkMeta;
+    Float_t dyRkMeta = td->dyRkMeta;
+    Float_t dzRkMeta = td->dzRkMeta;
 
     Float_t MetaMatchRKChiq = sqrt(
         (dxRkMeta*dxRkMeta/sigma_dx_sys0) +
         (dyRkMeta*dyRkMeta/sigma_dy_sys0) +
         (dzRkMeta*dzRkMeta/sigma_dz_sys0) );
 
-    Float_t angLepFit = td.getAngleWithClosestCandidate(1,1);
-    Float_t angLepUnFit = td.getAngleWithClosestCandidate(1,0);
-    Float_t angHadFit = td.getAngleWithClosestCandidate(0,1);
-    Float_t angHadUnFit = td.getAngleWithClosestCandidate(0,0);
+    Float_t angLepFit = td->getAngleWithClosestCandidate(1,1);
+    Float_t angLepUnFit = td->getAngleWithClosestCandidate(1,0);
+    Float_t angHadFit = td->getAngleWithClosestCandidate(0,1);
+    Float_t angHadUnFit = td->getAngleWithClosestCandidate(0,0);
 
     Float_t nearFit = 0.0;
     if (angLepFit > angHadFit)
@@ -60,41 +60,41 @@ HParticleCand::HParticleCand(HPidTrackCand& cand)
     else
         nearUnFit = angLepUnFit;
 
-    setSector(hd.nSector);
+    setSector(hd->nSector);
     setTofRec(-1.0);
-    setRingCorr(hd.hasRingCorrelation[4] ? 1 : 0);
-    setMdcdEdx(hd.fCombinedMdcdEdx);
-    setMdcdEdxIn(hd.getInnerMdcdEdx());
-    setMdcdEdxOu(hd.getOuterMdcdEdx());
-    setTofdEdx(td.fCorrectedEloss[4]);
-    setSystem(hd.iSystem);
-    setCharge(td.nPolarity[4]);
-    setMomentum(td.fMomenta[4]);
-    setPhi(td.fRKPhi);
-    setTheta(td.fRKTheta);
-    setR(td.fTrackR[4]);
-    setZ(td.fTrackZ[4]);
-    setChi2(td.fRKChiSquare);
-    setInnerSegmentChi2(hd.fInnerMdcChiSquare);
-    setOuterSegmentChi2(hd.fOuterMdcChiSquare);
+    setRingCorr(hd->hasRingCorrelation[4] ? 1 : 0);
+    setMdcdEdx(hd->fCombinedMdcdEdx);
+    setMdcdEdxIn(hd->getInnerMdcdEdx());
+    setMdcdEdxOu(hd->getOuterMdcdEdx());
+    setTofdEdx(td->fCorrectedEloss[4]);
+    setSystem(hd->iSystem);
+    setCharge(td->nPolarity[4]);
+    setMomentum(td->fMomenta[4]);
+    setPhi(td->fRKPhi);
+    setTheta(td->fRKTheta);
+    setR(td->fTrackR[4]);
+    setZ(td->fTrackZ[4]);
+    setChi2(td->fRKChiSquare);
+    setInnerSegmentChi2(hd->fInnerMdcChiSquare);
+    setOuterSegmentChi2(hd->fOuterMdcChiSquare);
     setMetaMatchQuality(MetaMatchRKChiq);
-    setTofinoMultiplicity(hd.getTofinoMult());
-    setRichPhi(hd.getRichPhi());
-    setRichTheta(hd.getRichTheta());
-    setRingAmplitude(hd.getRingAmplitude());
-    setRingHouTra(hd.getRingHouTra());
-    setRingNumPads(hd.getRingPadNr());
-    setRingCentroid(hd.getRingCentroid());
-    setRingPatternMatrix(hd.getRingPatMat());
-    setDistanceToMetaHit(td.getPathLength(4));
-    setShowerSum0(hd.getShowerSum(0));
-    setShowerSum1(hd.getShowerSum(1));
-    setShowerSum2(hd.getShowerSum(2));
+    setTofinoMultiplicity(hd->getTofinoMult());
+    setRichPhi(hd->getRichPhi());
+    setRichTheta(hd->getRichTheta());
+    setRingAmplitude(hd->getRingAmplitude());
+    setRingHouTra(hd->getRingHouTra());
+    setRingNumPads(hd->getRingPadNr());
+    setRingCentroid(hd->getRingCentroid());
+    setRingPatternMatrix(hd->getRingPatMat());
+    setDistanceToMetaHit(td->getPathLength(4));
+    setShowerSum0(hd->getShowerSum(0));
+    setShowerSum1(hd->getShowerSum(1));
+    setShowerSum2(hd->getShowerSum(2));
     setAngleToNearbyFittedInner(nearFit);
     setAngleToNearbyUnfittedInner(nearUnFit);
 
-    setBeta( ( (getDistanceToMetaHit()/1000.0) / hd.getTof()*1e-9)/clight );
-    setMass2( calcMassSq( hd.getTof()*1e-9,
+    setBeta( ( (getDistanceToMetaHit()/1000.0) / hd->getTof()*1e-9)/clight );
+    setMass2( calcMassSq( hd->getTof()*1e-9,
                           getMomentum(),
                           getDistanceToMetaHit()/1000.0) );
 }

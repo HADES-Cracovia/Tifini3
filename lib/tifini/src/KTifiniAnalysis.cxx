@@ -218,7 +218,7 @@ void KTifiniAnalysis::exec()
     if  (!fEvent) exit(1);
 
 #ifdef HYDRA1COMP
-    HCategory* fCatCand = (HCategory*)gHades->getCurrentEvent()->getCategory(catPidCandidate);
+    HCategory* fCatCand = (HCategory*)gHades->getCurrentEvent()->getCategory(catPidTrackCand);
 #else
     HCategory* fCatCand = (HCategory*)HCategoryManager::getCategory(catParticleCand, 1, "HParticleCandSim");
     HCategory* fFwDetCand = (HCategory*)HCategoryManager::getCategory(catFwDetCand, 1, "catFwDetCand");
@@ -228,7 +228,7 @@ void KTifiniAnalysis::exec()
     if  (!fFwDetCand) exit(1);
 #endif
 
-    if  (!fCatCand) exit(1);
+    if  (!fCatCand) { std::cerr << "ERROR: No Cand category" << std::endl; exit(1); }
 
     // prepare output tree
     TFile * Outputfile = new TFile(file_out, "RECREATE");

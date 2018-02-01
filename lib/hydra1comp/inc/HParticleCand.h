@@ -184,15 +184,13 @@ public:
     void     setShowerSum2(Float_t q)         { fShowerSum2 = q;            }
     Float_t  getShowerSum2() const            { return fShowerSum2;         }
 
-    HPidTrackCand & getTrackCand()            { return tcand; }
-    HPidTrackData & getTrackData()            { return td;    }
-    HPidHitData &   getHitData()              { return hd;    }
+    HPidTrackCand * getTrackCand()            { return tcand; }
+    HPidTrackData * getTrackData()            { return tcand->getTrackData();	}
+    HPidHitData *   getHitData()              { return tcand->getHitData();    	}
 private:
     Float_t calcMassSq(Float_t Tof, Float_t Momentum, Float_t PathLength);
 
-    HPidTrackCand tcand;
-    HPidTrackData td;
-    HPidHitData hd;
+    HPidTrackCand * tcand;
 
     ClassDef(HParticleCand,1)  // A simple track of a particle
 };

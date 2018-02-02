@@ -28,30 +28,25 @@ SET(HYDRA_INSTALLED_VERSION_TOO_OLD FALSE)
 
 SET(HYDRA_MAIN_LIBRARY HYDRA_MAIN_LIBRARY-NOTFOUND)
 
-FIND_LIBRARY(HYDRA_MAIN_LIBRARY NAMES Hydra PATHS
+FIND_LIBRARY(HYDRA_MAIN_LIBRARY NAMES Pid PATHS
     ${HYDRA_PACKAGE_SEARCHPATH}
     NO_DEFAULT_PATH)
     
 IF (${HYDRA_MAIN_LIBRARY} MATCHES "HYDRA_MAIN_LIBRARY-NOTFOUND")
-    MESSAGE( FATAL_ERROR "Hydra library not found. Please check your Hydra installation.")
+    MESSAGE( STATUS "Hydra library not found. Please check your Hydra installation.")
+    SET(HYDRA_FOUND FALSE)
 ELSE (${HYDRA_MAIN_LIBRARY} MATCHES "HYDRA_MAIN_LIBRARY-NOTFOUND")
     MESSAGE(STATUS "Looking for Hydra... - found ${INTHADDIR}")
     MESSAGE(STATUS "   MYHADDIR = ${MYHADDIR}")
+    SET(HYDRA_FOUND TRUE)
 ENDIF (${HYDRA_MAIN_LIBRARY} MATCHES "HYDRA_MAIN_LIBRARY-NOTFOUND")  
-
-SET(HYDRA_FOUND TRUE)
-
-# IF (INTHADDIR)
-#	MESSAGE(STATUS "Looking for Root... - version ${ROOTVERSION} ")
-# ENDIF (INTHADDIR)
-
 
 IF (HYDRA_FOUND)
     SET(HYDRA_LIBRARY_DIR ${INTHADDIR}/lib )
     SET(HYDRA_INCLUDE_DIR ${INTHADDIR}/include )
 
     set(HYDRA_LIBRARIES)
-    foreach(_cpt Alignment Dst HadesGo4 Hodo Hydra Hyp Kick MdcGarfield MdcPid Mdc MdcTrackD MdcTrackG MdcTrackS MdcUtil Online Pairs PhyAna Pid PidUtil QA Revt Rich RichUtil Rpc Shower ShowerTofino ShowerUtil Simulation Start Tofino Tof TofUtil Tools Trigger TriggerUtil Wall)
+    foreach(_cpt Alignment Dst HadesGo4 Hodo Hydra Hyp Kick MdcGarfield MdcPid Mdc MdcTrackD MdcTrackG MdcTrackS MdcUtil Pairs PhyAna Pid PidUtil QA Revt Rich RichUtil Rpc Shower ShowerTofino ShowerUtil Simulation Start Tofino Tof TofUtil Tools Trigger TriggerUtil Wall Ora OraSim OraUtil)
         find_library(HYDRA_${_cpt}_LIBRARY NAMES ${_cpt} lib{_cpt} HINTS ${HYDRA_LIBRARY_DIR})
         if(HYDRA_${_cpt}_LIBRARY)
             mark_as_advanced(HYDRA_${_cpt}_LIBRARY)

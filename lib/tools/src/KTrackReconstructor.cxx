@@ -131,6 +131,32 @@ void KTrackReconstructor::reconstruct(const HParticleCand& track_a, const HParti
 #endif
 }
 
+void KTrackReconstructor::reconstruct(KTrackReconstructor& track_a, KTrackReconstructor& track_b)
+{
+    reconstruct((TLorentzVector&)track_a, (TLorentzVector&)track_b);
+    tr_al = track_a;
+    tr_bl = track_b;
+
+    HGeomVector ev_vertex = vec_no_data;
+    pair_had.setPair(&track_a.pair_had, -1, &track_b.pair_had, -1, -1, 0, ev_vertex);
+    decay_vertex = pair_had.getDecayVertex();
+    mtd = pair_had.getMinDistCandidates();
+    mtd_a = pair_had.getVerMinDistCand(0);
+}
+
+void KTrackReconstructor::reconstruct(KTrackReconstructor& track_a, HParticleCand& track_b)
+{
+    reconstruct((TLorentzVector&)track_a, (TLorentzVector&)track_b);
+    tr_al = track_a;
+    tr_bl = track_b;
+
+    HGeomVector ev_vertex = vec_no_data;
+    pair_had.setPair(&track_a.pair_had, -1, &track_b, -1, -1, 0, ev_vertex);
+    decay_vertex = pair_had.getDecayVertex();
+    mtd = pair_had.getMinDistCandidates();
+    mtd_a = pair_had.getVerMinDistCand(0);
+}
+
 void KTrackReconstructor::reconstruct(const HParticleCand& track_a, const TLorentzVector& track_b)
 {
     reconstruct((TLorentzVector&)track_a, (TLorentzVector&)track_b);
@@ -149,13 +175,30 @@ void KTrackReconstructor::reconstruct(const TLorentzVector& track_a, const TLore
 }
 
 #ifndef HYDRA1COMP
+void KTrackReconstructor::reconstruct(KTrackReconstructor& track_a, HFwDetCand& track_b)
+{
+    reconstruct((TLorentzVector&)track_a, (TLorentzVector&)track_b);
+    tr_al = track_a;
+    tr_bl = track_b;
+
+    HGeomVector ev_vertex = vec_no_data;
+    pair_had.setPair(&track_b, -1, &track_a.pair_had, -1, -1, 0, ev_vertex);
+    decay_vertex = pair_had.getDecayVertex();
+    mtd = pair_had.getMinDistCandidates();
+    mtd_a = pair_had.getVerMinDistCand(0);
+}
+
 void KTrackReconstructor::reconstruct(const HParticleCand& track_a, const HFwDetCand& track_b)
 {
     reconstruct((TLorentzVector&)track_a, (TLorentzVector&)track_b);
     tr_ah = track_a;
     tr_bf = track_b;
     full_case = 11;
-    clear_no_reco();
+    HGeomVector ev_vertex = vec_no_data;
+    pair_had.setPair(&tr_bf, -1, &tr_ah, -1, -1, 0, ev_vertex);
+    decay_vertex = pair_had.getDecayVertex();
+    mtd = pair_had.getMinDistCandidates();
+    mtd_a = pair_had.getVerMinDistCand(0);
 }
 
 void KTrackReconstructor::reconstruct(const HFwDetCand& track_a, const HFwDetCand& track_b)
@@ -164,7 +207,11 @@ void KTrackReconstructor::reconstruct(const HFwDetCand& track_a, const HFwDetCan
     tr_af = track_a;
     tr_bf = track_b;
     full_case = 12;
-    clear_no_reco();
+    HGeomVector ev_vertex = vec_no_data;
+    pair_had.setPair(&tr_bf, -1, &tr_af, -1, -1, 0, ev_vertex);
+    decay_vertex = pair_had.getDecayVertex();
+    mtd = pair_had.getMinDistCandidates();
+    mtd_a = pair_had.getVerMinDistCand(0);
 }
 #endif
 

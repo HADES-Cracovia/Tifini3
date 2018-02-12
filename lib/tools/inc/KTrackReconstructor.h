@@ -51,10 +51,13 @@ public:
     KTrackReconstructor & operator=(const KTrack & cand);
     KTrackReconstructor & operator=(const TLorentzVector & cand);
 
+    void reconstruct(KTrackReconstructor & track_a, KTrackReconstructor & track_b);
+    void reconstruct(KTrackReconstructor & track_a, HParticleCand & track_b);
     void reconstruct(const HParticleCand & track_a, const HParticleCand & track_b);
     void reconstruct(const HParticleCand & track_a, const TLorentzVector & track_b);
     void reconstruct(const TLorentzVector & track_a, const TLorentzVector & track_b);
 #ifndef HYDRA1COMP
+    void reconstruct(KTrackReconstructor & track_a, HFwDetCand & track_b);
     void reconstruct(const HParticleCand & track_a, const HFwDetCand & track_b);
     void reconstruct(const HFwDetCand & track_a, const HFwDetCand & track_b);
 #endif

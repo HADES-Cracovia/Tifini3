@@ -2,7 +2,7 @@ include_directories(inc)
 link_directories(${PARTICLEEVENT_LIBRARY_DIR})
 
 ROOT_STANDARD_LIBRARY_PACKAGE(Tifini
-        DEPENDENCIES ${ROOT_LIBRARIES} Hydra TifiniTools)
+        DEPENDENCIES ${ROOT_LIBRARIES} ${HYDRA_LIBRARIES} TifiniTools)
 
 # Add all targets to the build-tree export set
 export(TARGETS Tifini TifiniTools

@@ -70,6 +70,8 @@ static Bool_t selectHadronsQa(HParticleCand * pcand)
         Particle::kIsAcceptedHitMETA,
         Particle::kIsAcceptedRK
         ) &&
+//        pcand->isFlagBit(kIsUsed)
+//        &&
         pcand->getInnerSegmentChi2() > 0
         &&                                                   //pcand->getBeta>0.9 && pcand->getBeta<1.1
         pcand->getChi2()             < 1000      // RK       //MetaQA<4

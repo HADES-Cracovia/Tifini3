@@ -21,6 +21,8 @@
 #include "KTifiniAnalysis.h"
 #include "KAbstractAnalysis.h"
 
+#include "KCutInside.h"
+
 #include <iostream>
 #include <cstring>
 
@@ -259,7 +261,9 @@ bool KAbstractAnalysis::makePID_Beta(const HParticleCand *cand, KT::ParticleID p
     Float_t cut_val = cand->getMomentum()/sqrt( cand->getMomentum()*cand->getMomentum() +
     HPhysicsConstants::mass(pid)*HPhysicsConstants::mass(pid) );
 
-    if( (cut_val - 0.2) < beta && (cut_val + 0.2) > beta )
+    KCutInside<Float_t> beta_cut(cut_val-0.2, cut_val+0.2, KT::WEAK, KT::WEAK);
+
+    if (beta_cut.test(beta))
         return true;
     else
         return false;

@@ -5,7 +5,8 @@ string(TOUPPER "${PROJECT_NAME}" CAPS_PROJECT_NAME)
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Modules" ${ROOTSYS})
 
 find_package(ROOT
-    REQUIRED COMPONENTS Core RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics MathCore Thread Cint)
+    REQUIRED COMPONENTS Core RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics MathCore Thread
+    OPTIONAL_COMPONENTS Cint Cling)
 include(RootNewMacros)
 
 ##### the version number
